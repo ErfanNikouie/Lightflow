@@ -1,0 +1,7 @@
+{
+  "orchestrator": { "model": "gpt-5.6", "reasoning": "medium" },
+  "explorer": { "model": "gpt-5.6-luna", "reasoning": "medium" },
+  "architect": { "model": "gpt-5.6", "reasoning": "xhigh" },
+  "worker": { "model": "gpt-5.6", "reasoning": "medium" },
+  "reviewer": { "model": "gpt-5.6", "reasoning": "high" }
+}

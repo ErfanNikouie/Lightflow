@@ -1,0 +1,14 @@
+# Architecture
+
+Lightflow has two cooperating layers:
+
+1. The `lightflow` plugin supplies one implicitly selectable orchestration skill and focused policy references. It contains no MCP server and does not duplicate Ponytail, engine/vendor skills, or game-development skill packs.
+2. The project scaffold supplies repository instructions, five project-scoped custom agents, model selection, and an optional shared-toolset registry.
+
+The main Codex agent acts as Orchestrator. The five custom agent files exist so the same roles are available for explicit or automatic delegation, but the workflow never spawns a second Orchestrator. Explorer, Architect, and Reviewer are read-only; Worker is write-capable.
+
+The agent files do not set `skills.config`, so current Codex behavior makes them inherit the parent session's available skills. Lightflow can therefore route into installed Unity, vendor, project, or Ponytail skills without bundling or naming a fixed inventory. Skill selection remains description-driven; absent skills fall back to repository guidance and native tools.
+
+Model values live only in `profiles/*.json`. The source agent TOML files contain role behavior, and `scripts/setup.ps1` injects the selected model settings into a target project. This avoids three copies of every agent instruction.
+
+Current Codex project agents are standalone `.codex/agents/*.toml` configuration layers, as documented in [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents). `AGENTS.md` provides the primary-agent orchestration behavior. Plan Mode remains a host-controlled mode; Lightflow changes its workflow when that mode is active but does not configure the mode.

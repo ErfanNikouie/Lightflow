@@ -1,0 +1,191 @@
+[
+  {
+    "id": "trivial-rename",
+    "prompt": "Rename this property.",
+    "workType": "TRIVIAL",
+    "architecture": "EXISTING",
+    "risk": "LOW",
+    "planMode": false,
+    "route": ["worker"],
+    "decision": "implement-and-lightly-verify"
+  },
+  {
+    "id": "failing-rpc",
+    "prompt": "Fix this failing RPC.",
+    "workType": "BUGFIX",
+    "architecture": "EXISTING",
+    "risk": "NORMAL",
+    "planMode": false,
+    "route": ["explorer", "worker"],
+    "decision": "reproduce-root-cause-fix"
+  },
+  {
+    "id": "complete-user-architecture",
+    "prompt": "Implement the supplied complete service architecture.",
+    "workType": "FEATURE",
+    "architecture": "USER_COMPLETE",
+    "risk": "NORMAL",
+    "planMode": false,
+    "route": ["worker"],
+    "decision": "preserve-user-design"
+  },
+  {
+    "id": "partial-user-architecture",
+    "prompt": "Keep my repository interfaces and service flow; decide the missing transactions and concurrency behavior.",
+    "workType": "FEATURE",
+    "architecture": "USER_PARTIAL",
+    "risk": "HIGH",
+    "planMode": false,
+    "route": ["architect", "worker", "reviewer"],
+    "decision": "architect-fills-gaps-only"
+  },
+  {
+    "id": "incomplete-refactor",
+    "prompt": "Significantly refactor this subsystem; the target boundaries are not decided.",
+    "workType": "REFACTOR",
+    "architecture": "UNSPECIFIED",
+    "risk": "HIGH",
+    "planMode": false,
+    "route": ["explorer", "architect", "worker", "reviewer"],
+    "skills": ["ponytail"],
+    "decision": "design-then-preserve-behavior"
+  },
+  {
+    "id": "project-port",
+    "prompt": "Port this system from project A into project B.",
+    "workType": "INTEGRATION",
+    "architecture": "EXISTING",
+    "risk": "HIGH",
+    "planMode": false,
+    "route": ["explorer", "explorer", "architect", "worker", "reviewer"],
+    "decision": "parallel-source-target-map"
+  },
+  {
+    "id": "reuse-toolset",
+    "prompt": "Add matchmaking using our approved shared module when possible.",
+    "workType": "INTEGRATION",
+    "architecture": "EXISTING",
+    "risk": "NORMAL",
+    "planMode": false,
+    "route": ["explorer", "worker"],
+    "tools": ["go.mod", "README-first", "source-fallback"],
+    "decision": "reuse-existing-toolset"
+  },
+  {
+    "id": "local-capability",
+    "prompt": "Add a one-project-only debug overlay that is absent from shared toolsets.",
+    "workType": "FEATURE",
+    "architecture": "EXISTING",
+    "risk": "LOW",
+    "planMode": false,
+    "route": ["worker"],
+    "decision": "implement-locally"
+  },
+  {
+    "id": "propose-reusable-capability",
+    "prompt": "We need the same authentication primitive in three projects, but the shared toolset lacks it.",
+    "workType": "INTEGRATION",
+    "architecture": "USER_PARTIAL",
+    "risk": "HIGH",
+    "planMode": false,
+    "route": ["explorer", "architect"],
+    "decision": "propose-toolset-extension-and-request-approval",
+    "stopBeforeMutation": true
+  },
+  {
+    "id": "unapproved-toolset-mutation",
+    "prompt": "Implement my project feature; it seems to require changing our shared package.",
+    "workType": "INTEGRATION",
+    "architecture": "EXISTING",
+    "risk": "HIGH",
+    "planMode": false,
+    "route": ["explorer"],
+    "decision": "request-explicit-toolset-approval",
+    "stopBeforeMutation": true
+  },
+  {
+    "id": "approved-toolset-api",
+    "prompt": "Approved: extend the public shared toolset API as proposed.",
+    "workType": "INTEGRATION",
+    "architecture": "USER_PARTIAL",
+    "risk": "HIGH",
+    "planMode": false,
+    "route": ["explorer", "architect", "worker", "reviewer"],
+    "decision": "approved-high-risk-toolset-change"
+  },
+  {
+    "id": "plan-complete-architecture",
+    "prompt": "Plan this first; I supplied the complete architecture.",
+    "workType": "ARCHITECTURE",
+    "architecture": "USER_COMPLETE",
+    "risk": "NORMAL",
+    "planMode": true,
+    "route": [],
+    "decision": "orchestrator-produces-plan"
+  },
+  {
+    "id": "plan-unresolved-design",
+    "prompt": "Plan this system; persistence and concurrency are unresolved.",
+    "workType": "ARCHITECTURE",
+    "architecture": "UNSPECIFIED",
+    "risk": "HIGH",
+    "planMode": true,
+    "route": ["explorer", "architect", "reviewer"],
+    "decision": "investigate-design-review-plan"
+  },
+  {
+    "id": "unity-source-only",
+    "prompt": "Change this pure Unity C# calculation and test it.",
+    "workType": "FEATURE",
+    "architecture": "EXISTING",
+    "risk": "LOW",
+    "planMode": false,
+    "route": ["worker"],
+    "tools": ["compiler"],
+    "skills": ["applicable-installed-unity-skill"],
+    "decision": "avoid-unity-editor"
+  },
+  {
+    "id": "unity-runtime-state",
+    "prompt": "Add this prefab feature and verify it in Play Mode.",
+    "workType": "FEATURE",
+    "architecture": "EXISTING",
+    "risk": "NORMAL",
+    "planMode": false,
+    "route": ["worker"],
+    "tools": ["unity-editor"],
+    "skills": ["applicable-installed-unity-skill"],
+    "decision": "validate-serialized-runtime-state"
+  },
+  {
+    "id": "go-nakama-normal",
+    "prompt": "Implement this normal Nakama handler.",
+    "workType": "FEATURE",
+    "architecture": "EXISTING",
+    "risk": "NORMAL",
+    "planMode": false,
+    "route": ["worker"],
+    "tools": ["go-test", "go-vet"],
+    "decision": "native-go-tooling"
+  },
+  {
+    "id": "critical-precision",
+    "prompt": "This persistence migration is critical; use maximum precision.",
+    "workType": "FEATURE",
+    "architecture": "USER_PARTIAL",
+    "risk": "CRITICAL",
+    "planMode": false,
+    "route": ["explorer", "architect", "worker", "reviewer"],
+    "decision": "precision-design-implementation-review"
+  },
+  {
+    "id": "normal-feature-no-ceremony",
+    "prompt": "Implement this clear normal feature.",
+    "workType": "FEATURE",
+    "architecture": "EXISTING",
+    "risk": "NORMAL",
+    "planMode": false,
+    "route": ["worker"],
+    "decision": "direct-worker"
+  }
+]

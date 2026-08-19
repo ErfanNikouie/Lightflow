@@ -1,0 +1,26 @@
+{
+  "name": "lightflow",
+  "version": "0.2.0",
+  "description": "Route natural software-development requests through the smallest reliable Codex workflow.",
+  "author": {
+    "name": "Lightflow contributors"
+  },
+  "homepage": "https://github.com/ErfanNikouie/Lightflow",
+  "repository": "https://github.com/ErfanNikouie/Lightflow",
+  "license": "MIT",
+  "keywords": ["development", "orchestration", "review", "architecture"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Lightflow",
+    "shortDescription": "Natural, risk-aware software delivery",
+    "longDescription": "Classifies software work, preserves user architecture, delegates only when useful, validates changes, and protects shared production toolsets.",
+    "developerName": "Lightflow contributors",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Implement this feature.",
+      "Fix this bug.",
+      "Plan this system first."
+    ]
+  }
+}

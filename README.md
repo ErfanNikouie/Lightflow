@@ -1,2 +1,80 @@
 # Lightflow
-A set of AI tools and skills I use to keep my workflow light and natural.
+
+Lightflow is a small, team-shareable Codex plugin and repository scaffold for natural software-development requests. Install the plugin, run one setup command in a project, and ask for work normally; the workflow chooses the least expensive route that still protects correctness and architectural intent.
+
+## Quick start
+
+1. Add this repository as a marketplace:
+
+   ```powershell
+   codex plugin marketplace add ErfanNikouie/Lightflow
+   codex plugin add lightflow@lightflow
+   ```
+
+   Repo marketplaces and Git sources are supported by the [official plugin packaging documentation](https://developers.openai.com/plugins/build/plugins).
+
+2. Configure a target repository from this checkout:
+
+   ```bat
+   scripts\setup.bat C:\path\to\project balanced
+   ```
+
+   Profiles are `balanced` (default), `quality`, and `economy`. To change only model settings later:
+
+   ```bat
+   scripts\setup.bat C:\path\to\project quality --profile-only
+   ```
+
+3. Optionally edit the target project's `.codex/toolsets.json` to declare approved shared production-code repositories.
+
+4. Open the project in ChatGPT/Codex and speak naturally:
+
+   - “Implement player reconnect.”
+   - “Refactor this service. Keep these three interfaces, but decide the remaining boundaries yourself.”
+   - “Port the leaderboard implementation from repository A, but reuse our shared Go economy module.”
+   - “Plan this first. I already decided how persistence works.”
+
+The workflow does not require users to name agents, skills, MCPs, or validation steps.
+
+## What gets installed
+
+- A managed section in the target `AGENTS.md` (existing instructions are preserved and backed up before the first merge).
+- `.codex/config.toml` model and multi-agent defaults, merged without removing unrelated settings.
+- Exactly five project agents in `.codex/agents/`: orchestrator, explorer, architect, worker, and reviewer.
+- An empty `.codex/toolsets.json` registry when the project does not already have one.
+
+See [installation](docs/installation.md), [architecture](docs/architecture.md), [profiles](docs/profiles.md), and [toolsets](docs/toolsets.md) for the operator-facing details.
+
+## Toolsets and installed skills
+
+Toolset entries point at approved repositories and known packages/modules. Explorer recognizes Go modules from `go.work`/`go.mod` and Unity UPM packages from `package.json`, reads the relevant module/package `README.md` first, and inspects the smallest necessary source/tests only when documentation is absent or insufficient.
+
+Lightflow uses applicable skills already available in the current Codex installation, including Unity/vendor/project skills. Its custom agents inherit the parent skill configuration. Ponytail principles are implicit, and installed Ponytail review skills are used only when deeper simplicity review is worthwhile. These skills are not bundled: teammates get the same integration when they install/enable the same skills, while Lightflow falls back to native tooling when they do not.
+
+## Platform adaptation
+
+The scaffold follows current OpenAI documentation: project custom agents are standalone `.codex/agents/*.toml` layers, repo instructions live in `AGENTS.md`, and the Windows desktop app runs natively with PowerShell. Plan Mode is controlled by the host UI/runtime; Lightflow changes routing behavior when planning is active but does not attempt to enable the mode itself.
+
+## Validation
+
+From PowerShell:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\evals\validate.ps1
+```
+
+The validator checks JSON/TOML syntax, manifest/role invariants, setup and profile-only behavior, routing scenarios, and the shared-toolset approval boundary.
+
+## Official references
+
+- [Package plugins and marketplaces](https://developers.openai.com/plugins/build/plugins)
+- [Build skills](https://learn.chatgpt.com/docs/build-skills)
+- [Configure subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)
+- [Use AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)
+- [Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
+- [Windows desktop behavior](https://learn.chatgpt.com/docs/windows/windows-app)
+- [ChatGPT Work execution boundaries](https://learn.chatgpt.com/docs/enterprise/chatgpt-work-overview)
+
+## License
+
+MIT. See [LICENSE](LICENSE).

@@ -1,0 +1,20 @@
+{
+  "name": "lightflow",
+  "interface": {
+    "displayName": "Lightflow"
+  },
+  "plugins": [
+    {
+      "name": "lightflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/lightflow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
