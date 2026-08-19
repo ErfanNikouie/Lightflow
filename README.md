@@ -25,9 +25,7 @@ Lightflow is a small, team-shareable Codex plugin and repository scaffold for na
    scripts\setup.bat C:\path\to\project quality --profile-only
    ```
 
-3. Optionally edit the target project's `.codex/toolsets.json` to declare approved shared production-code repositories.
-
-4. Open the project in ChatGPT/Codex and speak naturally:
+3. Open the project in ChatGPT/Codex and speak naturally:
 
    - “Implement player reconnect.”
    - “Refactor this service. Keep these three interfaces, but decide the remaining boundaries yourself.”
@@ -41,13 +39,12 @@ The workflow does not require users to name agents, skills, MCPs, or validation 
 - A managed section in the target `AGENTS.md` (existing instructions are preserved and backed up before the first merge).
 - `.codex/config.toml` model and multi-agent defaults, merged without removing unrelated settings.
 - Exactly five project agents in `.codex/agents/`: orchestrator, explorer, architect, worker, and reviewer.
-- An empty `.codex/toolsets.json` registry when the project does not already have one.
 
 See [installation](docs/installation.md), [architecture](docs/architecture.md), [profiles](docs/profiles.md), and [toolsets](docs/toolsets.md) for the operator-facing details.
 
 ## Toolsets and installed skills
 
-Toolset entries point at approved repositories and known packages/modules. Explorer recognizes Go modules from `go.work`/`go.mod` and Unity UPM packages from `package.json`, reads the relevant module/package `README.md` first, and inspects the smallest necessary source/tests only when documentation is absent or insufficient.
+No toolset registration is required. Explorer follows Unity's `Packages/manifest.json` and `Packages/packages-lock.json` into embedded/local packages and `Library/PackageCache`. For Go it follows `go.work`, `go.mod`, replacements/vendor, `go list -m -json all`, and `GOMODCACHE`. It reads each relevant resolved package/module `README.md` first and inspects the smallest necessary public API, source, and tests only when documentation is absent or insufficient.
 
 Lightflow uses applicable skills already available in the current Codex installation, including Unity/vendor/project skills. Its custom agents inherit the parent skill configuration. Ponytail principles are implicit, and installed Ponytail review skills are used only when deeper simplicity review is worthwhile. These skills are not bundled: teammates get the same integration when they install/enable the same skills, while Lightflow falls back to native tooling when they do not.
 
@@ -63,7 +60,7 @@ From PowerShell:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\evals\validate.ps1
 ```
 
-The validator checks JSON/TOML syntax, manifest/role invariants, setup and profile-only behavior, routing scenarios, and the shared-toolset approval boundary.
+The validator checks JSON/TOML syntax, manifest/role invariants, setup and profile-only behavior, native dependency discovery, routing scenarios, and the shared-source approval boundary.
 
 ## Official references
 

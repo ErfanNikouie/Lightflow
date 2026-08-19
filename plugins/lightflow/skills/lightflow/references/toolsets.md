@@ -1,18 +1,20 @@
-# Toolset discovery and reuse
+# Dependency/toolset discovery and reuse
 
-A toolset is an approved repository of production code, not an AI tool or MCP. The current project declares known toolsets in `.codex/toolsets.json`; do not hardcode studio repositories into this plugin.
+Do not require a hand-maintained registry. The project's native manifests, lockfiles, workspace files, and resolved local caches are the dependency map. Inspect only candidates relevant to the requested capability.
 
-When a capability plausibly belongs to a registered toolset, assign Explorer to inspect the registry and only the relevant repository/package candidates.
+## Unity packages
 
-For every candidate module or package that may satisfy the request:
+1. Read `Packages/manifest.json`, `Packages/packages-lock.json`, and embedded `Packages/*/package.json` files to identify direct and transitive UPM packages.
+2. Resolve installed packages through `Library/PackageCache`. For local, Git, or embedded dependencies, follow the resolved path/source and confirm identity using the package's own `package.json` `name`; do not infer identity from cache folder names alone.
+3. Read the nearest package `README.md` first. If it is missing or insufficient, inspect only the useful public surface: `package.json`, assembly definitions, relevant `Runtime`/`Editor` code, tests, and samples.
 
-1. Resolve its boundary and identity.
-   - Go: use `go.work` and `go.mod` for module boundaries, then package directories and import paths.
-   - Unity: use UPM `package.json` files and their `name` values; use the target project's `Packages/manifest.json` or lock file to confirm consumption when relevant.
-2. Read the nearest package/module `README.md` first, plus the registry's explicit `docs` path when present.
-3. If the README is missing or insufficient to establish behavior, compatibility, or integration, inspect the manifest and the smallest useful source surface: exported Go APIs and tests, or Unity assembly definitions plus `Runtime`, `Editor`, `Tests`, and samples as relevant.
-4. Return the capability, package/module identity and path, supported integration path, version/pinning constraints, and evidence. Do not dump whole repositories into context.
-5. Reuse a suitable existing package or module. If none exists, decide whether the missing capability is project-specific or genuinely reusable.
+## Go modules
+
+1. Read `go.work` and `go.mod`, including `use` and `replace` directives. When Go is available, prefer `go list -m -json all` for resolved module identities/directories and `go env GOMODCACHE` for the local module cache. Also respect a checked-in `vendor` directory.
+2. Do not download dependencies solely for discovery. Inspect already resolved workspace, replacement, vendor, or module-cache paths.
+3. Read the relevant module or package `README.md` first. If it is missing or insufficient, inspect only `go.mod`, exported APIs, relevant implementation, and tests needed to establish behavior and integration.
+
+Return the capability, package/module identity and resolved path, supported integration path, version/pinning constraints, and evidence. Reuse a suitable dependency through its public API; do not dump whole dependency trees into context.
 
 A reusable candidate normally serves multiple real projects, is foundational studio infrastructure, materially centralizes correctness/security/maintenance, or prevents costly divergent implementations. Hypothetical reuse is insufficient.
 
@@ -20,7 +22,7 @@ Implement project-specific behavior locally. For broadly reusable behavior, prop
 
 ## Hard approval boundary
 
-Reading and proposing are allowed. Do not change toolset source, APIs, packages, versions, branches, commits, or releases without explicit user approval for that toolset mutation. General permission to implement the current project is not approval.
+Reading and proposing are allowed. Never edit `Library/PackageCache`, `GOMODCACHE`, or vendored/generated dependency copies. To change a shared toolset, locate its writable source repository and obtain explicit approval for that repository change. General permission to implement the current project or update its dependency manifest is not approval to mutate shared source.
 
 After approval:
 
@@ -29,15 +31,3 @@ After approval:
 - Existing capability integration: target/toolset exploration as needed → Architect only for nontrivial adaptation → Worker.
 
 Public/shared API changes are at least `HIGH` risk. Prefer pinned/released versions where supported; upgrading consumers is a separate integration task.
-
-## Registry shape
-
-`toolsets.json` has `version: 1` and a `toolsets` array. Each entry may contain:
-
-- `name`: stable identifier.
-- `repository`: local path or repository URL.
-- `platform`: language/ecosystem such as `unity`, `go`, or `python`.
-- `packages`: known reusable packages/modules, either names or objects with `name`, `path`, and optional `docs`.
-- `docs`: documentation location.
-- `consumption`: how projects pin or consume it.
-- `release`: how approved changes are released.

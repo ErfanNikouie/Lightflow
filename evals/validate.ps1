@@ -51,13 +51,15 @@ Assert ($skillContent -match '(?m)^name:\s*lightflow\s*$') "Bundled skill name m
 Assert ($skillContent.Contains("inherit the parent session's available skills")) "Skill inheritance policy missing"
 
 $toolsetPolicy = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\skills\lightflow\references\toolsets.md")
-foreach ($requiredText in @("go.work", "go.mod", "package.json", "Packages/manifest.json", "README.md", "missing or insufficient")) {
+foreach ($requiredText in @("go.work", "go.mod", "go list -m -json all", "GOMODCACHE", "package.json", "Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "README.md", "missing or insufficient")) {
     Assert ($toolsetPolicy.Contains($requiredText)) "Toolset discovery policy missing: $requiredText"
 }
+Assert (-not $toolsetPolicy.Contains(".codex/toolsets.json")) "Manual toolset registry must not be required"
 $authorityPolicy = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\skills\lightflow\references\authority.md")
 Assert ($authorityPolicy.Contains("Ponytail applies implicitly")) "Implicit Ponytail policy missing"
 $explorerTemplate = Get-Content -Raw -LiteralPath (Join-Path $root "scaffold\.codex\agents\explorer.toml")
 Assert ($explorerTemplate.Contains("README.md first")) "Explorer README-first policy missing"
+Assert ($explorerTemplate.Contains("Library/PackageCache") -and $explorerTemplate.Contains("GOMODCACHE")) "Explorer native dependency-cache discovery missing"
 
 $marketplace = Get-Content -Raw -LiteralPath (Join-Path $root ".agents\plugins\marketplace.json") | ConvertFrom-Json
 Assert ($marketplace.name -eq "lightflow") "Marketplace name mismatch"
@@ -93,7 +95,7 @@ $scenarios = @()
 foreach ($scenarioItem in $scenarioData) { $scenarios += $scenarioItem }
 $required = @(
     "trivial-rename", "failing-rpc", "complete-user-architecture", "partial-user-architecture",
-    "incomplete-refactor", "project-port", "reuse-toolset", "local-capability",
+    "incomplete-refactor", "project-port", "reuse-toolset", "reuse-unity-package-cache", "local-capability",
     "propose-reusable-capability", "unapproved-toolset-mutation", "approved-toolset-api",
     "plan-complete-architecture", "plan-unresolved-design", "unity-source-only",
     "unity-runtime-state", "go-nakama-normal", "critical-precision", "normal-feature-no-ceremony"
@@ -134,9 +136,14 @@ Assert ("applicable-installed-unity-skill" -in @($unityRuntime.skills)) "Unity r
 $goScenario = $scenarios | Where-Object id -eq "go-nakama-normal"
 Assert ("go-test" -in @($goScenario.tools)) "Go/Nakama work must use native tests"
 $reuseToolset = $scenarios | Where-Object id -eq "reuse-toolset"
-foreach ($tool in @("go.mod", "README-first", "source-fallback")) {
+foreach ($tool in @("go.mod", "go-list-modules", "GOMODCACHE", "README-first", "source-fallback")) {
     Assert ($tool -in @($reuseToolset.tools)) "Toolset discovery scenario missing: $tool"
 }
+$reuseUnityPackage = $scenarios | Where-Object id -eq "reuse-unity-package-cache"
+foreach ($tool in @("Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "package.json", "README-first", "source-fallback")) {
+    Assert ($tool -in @($reuseUnityPackage.tools)) "Unity package-cache discovery scenario missing: $tool"
+}
+Assert ("applicable-installed-unity-skill" -in @($reuseUnityPackage.skills)) "Unity package discovery must use applicable installed Unity skills"
 $refactor = $scenarios | Where-Object id -eq "incomplete-refactor"
 Assert ("ponytail" -in @($refactor.skills)) "Meaningful refactor must apply Ponytail when available"
 $normalFeature = $scenarios | Where-Object id -eq "normal-feature-no-ceremony"
@@ -148,25 +155,25 @@ $tempBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $tempRoot = Join-Path $tempBase ("lightflow-eval-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $tempRoot | Out-Null
 try {
-    [System.IO.File]::WriteAllText((Join-Path $tempRoot "AGENTS.md"), "# Existing project`r`n`r`nKeep this instruction.`r`n")
+    [System.IO.File]::WriteAllText((Join-Path $tempRoot "AGENTS.md"), "# Existing project`r`n`r`nKeep this instruction.`r`n`r`n<!-- BEGIN NATURAL DEVELOPMENT WORKFLOW -->`r`nLegacy block.`r`n<!-- END NATURAL DEVELOPMENT WORKFLOW -->`r`n")
     New-Item -ItemType Directory -Path (Join-Path $tempRoot ".codex") | Out-Null
     [System.IO.File]::WriteAllText((Join-Path $tempRoot ".codex\config.toml"), "approval_policy = `"on-request`"`r`n")
 
     & (Join-Path $root "scripts\setup.ps1") -TargetRepository $tempRoot -Profile balanced | Out-Null
-    Assert ((Get-Content -Raw -LiteralPath (Join-Path $tempRoot "AGENTS.md")).Contains("Keep this instruction.")) "Setup overwrote existing AGENTS.md"
+    $installedAgents = Get-Content -Raw -LiteralPath (Join-Path $tempRoot "AGENTS.md")
+    Assert ($installedAgents.Contains("Keep this instruction.")) "Setup overwrote existing AGENTS.md"
+    Assert ($installedAgents.Contains("<!-- BEGIN LIGHTFLOW WORKFLOW -->") -and -not $installedAgents.Contains("NATURAL DEVELOPMENT WORKFLOW")) "Setup did not migrate the legacy managed block"
     Assert ((Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\config.toml")).Contains('approval_policy = "on-request"')) "Setup removed existing config"
     Assert (@(Get-ChildItem -LiteralPath (Join-Path $tempRoot ".codex\agents") -Filter "*.toml").Count -eq 5) "Setup did not generate five agents"
-    Assert (Test-Path -LiteralPath (Join-Path $tempRoot ".codex\toolsets.json")) "Setup did not create toolset registry"
+    Assert (-not (Test-Path -LiteralPath (Join-Path $tempRoot ".codex\toolsets.json"))) "Setup must not create a manual toolset registry"
     Assert (@(Get-ChildItem -LiteralPath $tempRoot -Filter "AGENTS.md.lightflow-backup-*").Count -eq 1) "Setup did not back up existing AGENTS.md"
 
     $agentsBefore = Get-Content -Raw -LiteralPath (Join-Path $tempRoot "AGENTS.md")
-    $toolsetsBefore = Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\toolsets.json")
     $workerBefore = (Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\agents\worker.toml")) -replace '(?m)^model(?:_reasoning_effort)?\s*=.*\r?\n?', ''
     $backupCount = @(Get-ChildItem -LiteralPath $tempRoot -Recurse -Filter "*.lightflow-backup-*").Count
 
     & (Join-Path $root "scripts\setup.ps1") -TargetRepository $tempRoot -Profile quality -ProfileOnly | Out-Null
     Assert ((Get-Content -Raw -LiteralPath (Join-Path $tempRoot "AGENTS.md")) -eq $agentsBefore) "Profile-only changed AGENTS.md"
-    Assert ((Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\toolsets.json")) -eq $toolsetsBefore) "Profile-only changed toolsets"
     Assert (@(Get-ChildItem -LiteralPath $tempRoot -Recurse -Filter "*.lightflow-backup-*").Count -eq $backupCount) "Profile-only created unrelated backups"
     $workerAfter = (Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\agents\worker.toml")) -replace '(?m)^model(?:_reasoning_effort)?\s*=.*\r?\n?', ''
     Assert ($workerAfter -eq $workerBefore) "Profile-only changed Worker instructions"

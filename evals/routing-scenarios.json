@@ -62,14 +62,26 @@
   },
   {
     "id": "reuse-toolset",
-    "prompt": "Add matchmaking using our approved shared module when possible.",
+    "prompt": "Add matchmaking using the Go module already resolved for this project when possible.",
     "workType": "INTEGRATION",
     "architecture": "EXISTING",
     "risk": "NORMAL",
     "planMode": false,
     "route": ["explorer", "worker"],
-    "tools": ["go.mod", "README-first", "source-fallback"],
-    "decision": "reuse-existing-toolset"
+    "tools": ["go.mod", "go-list-modules", "GOMODCACHE", "README-first", "source-fallback"],
+    "decision": "reuse-resolved-go-module"
+  },
+  {
+    "id": "reuse-unity-package-cache",
+    "prompt": "Use our existing Unity toolset package if it already provides this capability.",
+    "workType": "INTEGRATION",
+    "architecture": "EXISTING",
+    "risk": "NORMAL",
+    "planMode": false,
+    "route": ["explorer", "worker"],
+    "tools": ["Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "package.json", "README-first", "source-fallback"],
+    "skills": ["applicable-installed-unity-skill"],
+    "decision": "reuse-resolved-unity-package"
   },
   {
     "id": "local-capability",

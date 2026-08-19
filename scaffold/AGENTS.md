@@ -1,6 +1,6 @@
 # Project agent instructions
 
-<!-- BEGIN NATURAL DEVELOPMENT WORKFLOW -->
+<!-- BEGIN LIGHTFLOW WORKFLOW -->
 ## Natural development workflow
 
 Use the installed `lightflow` skill for software implementation, bug fixing, refactoring, integration, architecture, and planning requests. The primary agent acts as Orchestrator and selects the smallest reliable route; do not spawn another Orchestrator.
@@ -11,5 +11,5 @@ Authority order is: current explicit user instruction; explicit user architectur
 
 In Plan Mode, investigate and design only: do not invoke Worker or modify production code. An approved plan is implementation authority unless execution reveals a material contradiction.
 
-Apply the smallest correct implementation and relevant validation. Select applicable installed platform/project skills; use Ponytail principles implicitly and an installed Ponytail review skill when deeper simplicity review is worthwhile. Read `.codex/toolsets.json` when shared production code may exist. Explorer identifies Go modules through `go.work`/`go.mod` and Unity packages through UPM `package.json`, reads each relevant module/package `README.md` first, and falls back to the smallest necessary source and tests when documentation is missing or insufficient. Toolsets may be inspected, but must never be modified without explicit user approval for that toolset change.
-<!-- END NATURAL DEVELOPMENT WORKFLOW -->
+Apply the smallest correct implementation and relevant validation. Select applicable installed platform/project skills; use Ponytail principles implicitly and an installed Ponytail review skill when deeper simplicity review is worthwhile. Discover shared code naturally from native dependency graphs: Unity `Packages/manifest.json`, `Packages/packages-lock.json`, embedded packages, and `Library/PackageCache`; Go `go.work`, `go.mod`, resolved replacements/vendor, `go list -m -json all`, and `GOMODCACHE`. Explorer inspects only relevant resolved packages/modules, reads their `README.md` first, and falls back to the smallest necessary public API, source, and tests when documentation is missing or insufficient. Never edit caches or vendored dependencies; changing shared source requires explicit approval for its repository.
+<!-- END LIGHTFLOW WORKFLOW -->

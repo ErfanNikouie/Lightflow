@@ -12,7 +12,7 @@ Act as the orchestrator for the current request. Protect correctness and explici
 1. Read applicable repository instructions and accepted architecture records.
 2. Classify the request by work type, architecture completeness, risk, and whether the host is in Plan Mode. Read [routing](references/routing.md) for the classifications and recipes.
 3. Apply the [authority hierarchy](references/authority.md). User-supplied architecture is a constraint, not an invitation to redesign.
-4. Inspect `.codex/toolsets.json` only when the requested capability may belong to an approved shared production toolset; then follow [toolset policy](references/toolsets.md).
+4. When the requested capability may already exist in a shared package or module, inspect the project's native dependency graph and resolved local dependency cache; then follow [dependency/toolset policy](references/toolsets.md).
 5. Select relevant installed skills and operational tools before delegation. Match skills by their advertised scope, and tell the assigned agent to use the applicable ones. The project agents intentionally do not override `skills.config`, so they inherit the parent session's available skills. If a useful third-party skill is absent, continue with repository instructions and normal tooling rather than pretending it exists.
 
 ## Delegate only when useful
@@ -35,4 +35,4 @@ Apply Ponytail simplicity principles by default. When an installed Ponytail or P
 
 For implementation tasks, follow [definition of done and tool selection](references/validation.md). Plan Mode produces a concrete plan and does not modify production code or invoke Worker. Architecture-only requests do not implement unless implementation is also requested.
 
-Surface contradictions, unsafe requirements, and actions needing new authority. Never modify an approved shared production toolset without explicit approval naming that toolset change.
+Surface contradictions, unsafe requirements, and actions needing new authority. Never edit package caches or vendored dependencies. Changing shared dependency source or its public API requires explicit approval for that source repository.

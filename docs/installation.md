@@ -26,7 +26,7 @@ Run from this repository:
 scripts\setup.bat C:\path\to\project balanced
 ```
 
-The script resolves the target path, merges a marked block into `AGENTS.md`, preserves unrelated `.codex/config.toml` values, writes the five managed agent files, creates `.codex/toolsets.json` only when absent, injects the chosen profile, validates expected fields, and prints a summary. Existing files that the install/update path changes receive timestamped `.lightflow-backup-*` copies.
+The script resolves the target path, merges a marked block into `AGENTS.md`, preserves unrelated `.codex/config.toml` values, writes the five managed agent files, injects the chosen profile, validates expected fields, and prints a summary. Existing files that the install/update path changes receive timestamped `.lightflow-backup-*` copies.
 
 Change only model fields later:
 
@@ -34,6 +34,6 @@ Change only model fields later:
 scripts\setup.bat C:\path\to\project quality --profile-only
 ```
 
-The profile-only path requires an existing scaffold and does not reinstall instructions, toolsets, or role behavior.
+The profile-only path requires an existing scaffold and does not reinstall instructions or role behavior.
 
 The Windows desktop app uses PowerShell natively and shares `%USERPROFILE%\.codex` with native Codex. See [official Windows behavior](https://learn.chatgpt.com/docs/windows/windows-app) when mixing native Windows and WSL repositories.

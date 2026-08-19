@@ -3,7 +3,7 @@
 Lightflow has two cooperating layers:
 
 1. The `lightflow` plugin supplies one implicitly selectable orchestration skill and focused policy references. It contains no MCP server and does not duplicate Ponytail, engine/vendor skills, or game-development skill packs.
-2. The project scaffold supplies repository instructions, five project-scoped custom agents, model selection, and an optional shared-toolset registry.
+2. The project scaffold supplies repository instructions, five project-scoped custom agents, and model selection. Shared packages and modules are discovered from the project's native dependency graph and local caches.
 
 The main Codex agent acts as Orchestrator. The five custom agent files exist so the same roles are available for explicit or automatic delegation, but the workflow never spawns a second Orchestrator. Explorer, Architect, and Reviewer are read-only; Worker is write-capable.
 

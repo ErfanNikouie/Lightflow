@@ -1,29 +1,11 @@
 # Shared production toolsets
 
-Toolsets are approved repositories of production code, not AI tools or MCP servers. A configured target project keeps its registry in `.codex/toolsets.json`:
+Toolsets are ordinary project dependencies. Lightflow does not require `.codex/toolsets.json` or another hand-maintained registry.
 
-```json
-{
-  "version": 1,
-  "toolsets": [
-    {
-      "name": "studio-go",
-      "repository": "C:\\src\\studio-go",
-      "platform": "go",
-      "packages": [
-        { "name": "matchmaking", "path": "matchmaking", "docs": "matchmaking/README.md" },
-        { "name": "economy", "path": "economy", "docs": "economy/README.md" }
-      ],
-      "docs": "README.md",
-      "consumption": "Pinned Go module versions",
-      "release": "Tagged release after review"
-    }
-  ]
-}
-```
+For Unity, Explorer reads `Packages/manifest.json`, `Packages/packages-lock.json`, and embedded package manifests, then resolves installed code in `Library/PackageCache` or the lockfile's local/Git source. Package identity comes from its own `package.json`, not its cache-folder name.
 
-The registry prevents repeated repository discovery. Agents may inspect registered toolsets and propose changes. They may not modify source, APIs, package versions, branches, commits, or releases without explicit user approval for that toolset mutation. General permission to implement the current project is not approval.
+For Go, Explorer reads `go.work`, `go.mod`, `use`/`replace` directives, and vendor metadata. When Go is available, `go list -m -json all` supplies resolved module directories and `go env GOMODCACHE` locates the local module cache. Discovery does not download missing modules just to inspect them.
 
-Explorer resolves Go modules through `go.work`/`go.mod` and Unity UPM packages through their `package.json` name and path. For each relevant package/module it reads the nearest `README.md` first. When documentation is absent or insufficient, it inspects only the manifest, exported/public API, tests, assembly definitions, and relevant source/sample directories needed to establish behavior and integration.
+For each relevant resolved package/module, Explorer reads the nearest `README.md` first. When documentation is absent or insufficient, it inspects only the manifest, exported/public API, tests, assembly definitions, and relevant source/sample directories needed to establish behavior and integration.
 
-Project-specific behavior stays local. Broad reuse is proposed only for multiple real projects, foundational infrastructure, or meaningful correctness/security/maintenance centralization. Public toolset APIs are at least high risk, and consumers are not automatically upgraded.
+Caches and vendored/generated copies are read-only. To change a shared toolset, locate its writable source repository and obtain explicit approval for that repository. Project-specific behavior stays local. Broad reuse is proposed only for multiple real projects, foundational infrastructure, or meaningful correctness/security/maintenance centralization. Public toolset APIs are at least high risk, and consumers are not automatically upgraded.

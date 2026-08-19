@@ -90,8 +90,10 @@ function Set-TomlTableValue([string]$Path, [string]$Table, [string]$Key, [string
 
 function Merge-AgentInstructions([string]$Destination) {
     $source = Get-Content -Raw -LiteralPath (Join-Path $script:scaffoldRoot "AGENTS.md")
-    $begin = "<!-- BEGIN NATURAL DEVELOPMENT WORKFLOW -->"
-    $end = "<!-- END NATURAL DEVELOPMENT WORKFLOW -->"
+    $begin = "<!-- BEGIN LIGHTFLOW WORKFLOW -->"
+    $end = "<!-- END LIGHTFLOW WORKFLOW -->"
+    $legacyBegin = "<!-- BEGIN NATURAL DEVELOPMENT WORKFLOW -->"
+    $legacyEnd = "<!-- END NATURAL DEVELOPMENT WORKFLOW -->"
     $sourceStart = $source.IndexOf($begin)
     $sourceEnd = $source.IndexOf($end) + $end.Length
     $managed = $source.Substring($sourceStart, $sourceEnd - $sourceStart)
@@ -105,8 +107,15 @@ function Merge-AgentInstructions([string]$Destination) {
     $current = Get-Content -Raw -LiteralPath $Destination
     $currentStart = $current.IndexOf($begin)
     $currentEndMarker = $current.IndexOf($end)
+    if ($currentStart -lt 0 -or $currentEndMarker -lt $currentStart) {
+        $currentStart = $current.IndexOf($legacyBegin)
+        $currentEndMarker = $current.IndexOf($legacyEnd)
+        $currentEndToken = $legacyEnd
+    } else {
+        $currentEndToken = $end
+    }
     if ($currentStart -ge 0 -and $currentEndMarker -ge $currentStart) {
-        $currentEnd = $currentEndMarker + $end.Length
+        $currentEnd = $currentEndMarker + $currentEndToken.Length
         $updated = $current.Substring(0, $currentStart) + $managed + $current.Substring($currentEnd)
     } else {
         $updated = $current.TrimEnd() + "`r`n`r`n" + $managed + "`r`n"
@@ -137,10 +146,6 @@ if (-not $ProfileOnly) {
         Copy-Item -LiteralPath (Join-Path $scaffoldRoot ".codex\agents\$role.toml") -Destination $destination -Force
     }
 
-    $toolsetsPath = Join-Path $codexDir "toolsets.json"
-    if (-not (Test-Path -LiteralPath $toolsetsPath -PathType Leaf)) {
-        Copy-Item -LiteralPath (Join-Path $scaffoldRoot "toolsets.example.json") -Destination $toolsetsPath
-    }
 } elseif (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
     throw "Profile-only mode requires an existing Lightflow scaffold: $configPath"
 }
