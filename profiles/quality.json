@@ -1,7 +1,7 @@
 {
-  "orchestrator": { "model": "gpt-5.6", "reasoning": "high" },
+  "orchestrator": { "model": "gpt-5.6-sol", "reasoning": "high" },
   "explorer": { "model": "gpt-5.6-terra", "reasoning": "high" },
-  "architect": { "model": "gpt-5.6", "reasoning": "xhigh" },
-  "worker": { "model": "gpt-5.6", "reasoning": "high" },
-  "reviewer": { "model": "gpt-5.6", "reasoning": "xhigh" }
+  "architect": { "model": "gpt-5.6-sol", "reasoning": "xhigh" },
+  "worker": { "model": "gpt-5.6-sol", "reasoning": "high" },
+  "reviewer": { "model": "gpt-5.6-sol", "reasoning": "xhigh" }
 }

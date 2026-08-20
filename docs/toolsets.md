@@ -4,7 +4,7 @@ Toolsets are ordinary project dependencies. Lightflow does not require `.codex/t
 
 For Unity, Explorer reads `Packages/manifest.json`, `Packages/packages-lock.json`, and embedded package manifests, then resolves installed code in `Library/PackageCache` or the lockfile's local/Git source. Package identity comes from its own `package.json`, not its cache-folder name.
 
-For Go, Explorer reads `go.work`, `go.mod`, `use`/`replace` directives, and vendor metadata. When Go is available, `go list -m -json all` supplies resolved module directories and `go env GOMODCACHE` locates the local module cache. Discovery does not download missing modules just to inspect them.
+For Go, Explorer reads `go.work`, `go.mod`, `use`/`replace` directives, and vendor metadata. `go env GOMODCACHE` locates the local module cache. When Go is available, Explorer runs `go list -m -json all` with `GOPROXY=off`; if offline resolution fails, it inspects manifests and already resolved paths directly instead of downloading modules.
 
 For each relevant resolved package/module, Explorer reads the nearest `README.md` first. When documentation is absent or insufficient, it inspects only the manifest, exported/public API, tests, assembly definitions, and relevant source/sample directories needed to establish behavior and integration.
 

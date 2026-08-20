@@ -10,8 +10,8 @@ Do not require a hand-maintained registry. The project's native manifests, lockf
 
 ## Go modules
 
-1. Read `go.work` and `go.mod`, including `use` and `replace` directives. When Go is available, prefer `go list -m -json all` for resolved module identities/directories and `go env GOMODCACHE` for the local module cache. Also respect a checked-in `vendor` directory.
-2. Do not download dependencies solely for discovery. Inspect already resolved workspace, replacement, vendor, or module-cache paths.
+1. Read `go.work` and `go.mod`, including `use` and `replace` directives, and respect a checked-in `vendor` directory. Use `go env GOMODCACHE` to locate the local cache.
+2. When Go is available, run `go list -m -json all` with `GOPROXY=off` so discovery cannot download modules. If offline resolution fails or the read-only sandbox blocks cache writes, parse the workspace/module files and inspect already resolved replacement, vendor, or module-cache paths directly.
 3. Read the relevant module or package `README.md` first. If it is missing or insufficient, inspect only `go.mod`, exported APIs, relevant implementation, and tests needed to establish behavior and integration.
 
 Return the capability, package/module identity and resolved path, supported integration path, version/pinning constraints, and evidence. Reuse a suitable dependency through its public API; do not dump whole dependency trees into context.

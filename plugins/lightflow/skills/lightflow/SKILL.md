@@ -17,7 +17,7 @@ Act as the orchestrator for the current request. Protect correctness and explici
 
 ## Delegate only when useful
 
-The configured permanent roles are exactly Orchestrator, Explorer, Architect, Worker, and Reviewer. The primary agent performs orchestration; it does not spawn another Orchestrator.
+The primary agent is Orchestrator. The configured custom specialists are exactly Explorer, Architect, Worker, and Reviewer; never spawn a second Orchestrator.
 
 - Execute directly as Worker for trivial or sufficiently clear work.
 - Use Explorer for repository facts that are missing, especially reproduction, dependency tracing, or source/target integration mapping. Parallelize only independent read-only investigations.

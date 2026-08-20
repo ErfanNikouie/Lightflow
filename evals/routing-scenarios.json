@@ -68,7 +68,7 @@
     "risk": "NORMAL",
     "planMode": false,
     "route": ["explorer", "worker"],
-    "tools": ["go.mod", "go-list-modules", "GOMODCACHE", "README-first", "source-fallback"],
+    "tools": ["go.mod", "go-list-offline", "GOMODCACHE", "README-first", "source-fallback"],
     "decision": "reuse-resolved-go-module"
   },
   {

@@ -38,13 +38,13 @@ The workflow does not require users to name agents, skills, MCPs, or validation 
 
 - A managed section in the target `AGENTS.md` (existing instructions are preserved and backed up before the first merge).
 - `.codex/config.toml` model and multi-agent defaults, merged without removing unrelated settings.
-- Exactly five project agents in `.codex/agents/`: orchestrator, explorer, architect, worker, and reviewer.
+- Four project specialists in `.codex/agents/`: explorer, architect, worker, and reviewer. The primary Codex agent is Orchestrator.
 
-See [installation](docs/installation.md), [architecture](docs/architecture.md), [profiles](docs/profiles.md), and [toolsets](docs/toolsets.md) for the operator-facing details.
+See [installation](docs/installation.md), [migration](docs/migration.md), [architecture](docs/architecture.md), [profiles](docs/profiles.md), and [toolsets](docs/toolsets.md) for the operator-facing details.
 
 ## Toolsets and installed skills
 
-No toolset registration is required. Explorer follows Unity's `Packages/manifest.json` and `Packages/packages-lock.json` into embedded/local packages and `Library/PackageCache`. For Go it follows `go.work`, `go.mod`, replacements/vendor, `go list -m -json all`, and `GOMODCACHE`. It reads each relevant resolved package/module `README.md` first and inspects the smallest necessary public API, source, and tests only when documentation is absent or insufficient.
+No toolset registration is required. Explorer follows Unity's `Packages/manifest.json` and `Packages/packages-lock.json` into embedded/local packages and `Library/PackageCache`. For Go it follows `go.work`, `go.mod`, replacements/vendor, and `GOMODCACHE`, using `go list -m -json all` only with `GOPROXY=off`. It reads each relevant resolved package/module `README.md` first and inspects the smallest necessary public API, source, and tests only when documentation is absent or insufficient.
 
 Lightflow uses applicable skills already available in the current Codex installation, including Unity/vendor/project skills. Its custom agents inherit the parent skill configuration. Ponytail principles are implicit, and installed Ponytail review skills are used only when deeper simplicity review is worthwhile. These skills are not bundled: teammates get the same integration when they install/enable the same skills, while Lightflow falls back to native tooling when they do not.
 
@@ -60,7 +60,15 @@ From PowerShell:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\evals\validate.ps1
 ```
 
-The validator checks JSON/TOML syntax, manifest/role invariants, setup and profile-only behavior, native dependency discovery, routing scenarios, and the shared-source approval boundary.
+The fast validator checks JSON/TOML syntax, manifest/role invariants, setup and profile-only behavior, native dependency discovery, scenario contracts, and the shared-source approval boundary. It does not call a model.
+
+Run the opt-in live evaluator when changing routing or agent behavior. It requires Codex authentication and uses model quota:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\evals\run-behavioral.ps1
+```
+
+Use `-ScenarioId trivial-rename,failing-rpc` for a smaller run or `-SkipExecutionSmoke` to test routing without the workspace-write smoke task.
 
 ## Official references
 

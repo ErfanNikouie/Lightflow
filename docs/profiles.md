@@ -1,6 +1,6 @@
 # Model profiles
 
-Profile values are centralized in `profiles/*.json` and use current official GPT-5.6 IDs: `gpt-5.6` (Sol), `gpt-5.6-terra`, and `gpt-5.6-luna`.
+Profile values are centralized in `profiles/*.json` and use current Codex GPT-5.6 IDs: `gpt-5.6-sol`, `gpt-5.6-terra`, and `gpt-5.6-luna`.
 
 | Role | Balanced | Quality | Economy |
 |---|---|---|---|

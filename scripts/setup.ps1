@@ -15,7 +15,7 @@ $ErrorActionPreference = "Stop"
 $workflowRoot = Split-Path -Parent $PSScriptRoot
 $scaffoldRoot = Join-Path $workflowRoot "scaffold"
 $profilePath = Join-Path (Join-Path $workflowRoot "profiles") "$Profile.json"
-$roles = @("orchestrator", "explorer", "architect", "worker", "reviewer")
+$roles = @("explorer", "architect", "worker", "reviewer")
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 if (-not (Test-Path -LiteralPath $TargetRepository -PathType Container)) {
@@ -146,8 +146,16 @@ if (-not $ProfileOnly) {
         Copy-Item -LiteralPath (Join-Path $scaffoldRoot ".codex\agents\$role.toml") -Destination $destination -Force
     }
 
+    $legacyOrchestratorPath = Join-Path $agentsDir "orchestrator.toml"
+    if (Test-Path -LiteralPath $legacyOrchestratorPath -PathType Leaf) {
+        Backup-File $legacyOrchestratorPath | Out-Null
+        Remove-Item -LiteralPath $legacyOrchestratorPath -Force
+    }
+
 } elseif (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
     throw "Profile-only mode requires an existing Lightflow scaffold: $configPath"
+} elseif (Test-Path -LiteralPath (Join-Path $agentsDir "orchestrator.toml") -PathType Leaf) {
+    throw "Legacy orchestrator.toml requires one full Lightflow setup run before profile-only mode."
 }
 
 $orchestrator = $profileData.orchestrator
@@ -167,7 +175,7 @@ foreach ($role in $roles) {
 $expected = @($configPath) + @($roles | ForEach-Object { Join-Path $agentsDir "$_.toml" })
 foreach ($path in $expected) {
     $content = Get-Content -Raw -LiteralPath $path
-    if ($content -notmatch '(?m)^model\s*=\s*"gpt-5\.6(?:-terra|-luna)?"\s*$' -or
+    if ($content -notmatch '(?m)^model\s*=\s*"gpt-5\.6-(?:sol|terra|luna)"\s*$' -or
         $content -notmatch '(?m)^model_reasoning_effort\s*=\s*"(?:medium|high|xhigh)"\s*$') {
         throw "Generated model configuration failed validation: $path"
     }
