@@ -52,6 +52,8 @@ Assert ($skillContent -match '(?m)^name:\s*lightflow\s*$') "Bundled skill name m
 Assert ($skillContent.Contains("inherit the parent session's available skills")) "Skill inheritance policy missing"
 Assert ($skillContent.Contains("Exact replication") -and $skillContent.Contains("Template replication") -and $skillContent.Contains("Adaptation")) "Reference-intent routing policy missing"
 Assert ($skillContent.Contains("do not rewrite, minimize, redesign, or adapt")) "Exact-copy fidelity boundary missing"
+Assert ($skillContent.Contains("Fidelity does not expand scope")) "Exact-copy bounded-scope policy missing"
+Assert ($skillContent.Contains("bounded copy manifest")) "Exact-copy manifest policy missing"
 Assert ($skillContent.Contains("enumerate the applicable scenes and explicit exclusions")) "Unity scene coverage policy missing"
 
 $toolsetPolicy = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\skills\lightflow\references\toolsets.md")
@@ -159,7 +161,7 @@ foreach ($tool in @("source-project", "target-project", "unity-editor", "referen
 $exactCopy = $scenarios | Where-Object id -eq "exact-system-copy"
 Assert (@($exactCopy.route).Count -eq 0) "Normal exact replication must stay in the primary agent"
 Assert ($exactCopy.architecture -eq "USER_COMPLETE") "Exact source implementation must be treated as complete architecture"
-foreach ($tool in @("source-target-file-diff", "public-api-parity", "structure-parity", "serialized-wiring-parity")) {
+foreach ($tool in @("bounded-copy-manifest", "dependency-reasons", "explicit-exclusions", "read-only-sibling-audit", "source-target-file-diff", "public-api-parity", "structure-parity", "serialized-wiring-parity", "changed-file-scope-check")) {
     Assert ($tool -in @($exactCopy.tools)) "Exact replication missing parity check: $tool"
 }
 $completeUnity = $scenarios | Where-Object id -eq "unity-complete-scene-integration"

@@ -17,6 +17,6 @@ Reviewer checks correctness, requirements, regressions, architectural violations
 
 ## Reference and coverage validation
 
-- Exact replication: diff the relevant source and target artifact sets where practical. Confirm file/class/member names, public signatures, behavior, serialized components/references, settings/assets, and pipeline order remain equivalent. List every necessary target-specific deviation.
+- Exact replication: validate both fidelity and bounded scope. Diff the manifest-listed source and target artifacts where practical; confirm file/class/member names, public signatures, behavior, serialized components/references, settings/assets, and pipeline order remain equivalent. Compare the final changed-file list with the bounded copy manifest and fail completion on unrelated additions or modifications. List every necessary target-specific deviation.
 - Template replication: compare the complete reusable slice and verify its extension points remain intact; confirm only product-specific behavior was excluded.
 - Unity scene-wide integration: enumerate all project scenes and explicit exclusions, then verify the required components/prefabs, helpers, settings, loaders, pipeline registrations, package/assembly dependencies, and serialized references in every applicable scene. Exercise editor/runtime behavior when those are part of the change.

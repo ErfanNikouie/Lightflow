@@ -189,8 +189,8 @@
     "risk": "NORMAL",
     "planMode": false,
     "route": [],
-    "tools": ["source-target-file-diff", "public-api-parity", "structure-parity", "serialized-wiring-parity"],
-    "decision": "primary-exactly-replicates-and-reports-only-unavoidable-target-deviations"
+    "tools": ["bounded-copy-manifest", "dependency-reasons", "explicit-exclusions", "read-only-sibling-audit", "source-target-file-diff", "public-api-parity", "structure-parity", "serialized-wiring-parity", "changed-file-scope-check"],
+    "decision": "primary-exactly-replicates-only-the-named-system-and-required-dependency-closure"
   },
   {
     "id": "unity-complete-scene-integration",
