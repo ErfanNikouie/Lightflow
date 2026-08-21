@@ -55,6 +55,7 @@ Assert ($skillContent.Contains("do not rewrite, minimize, redesign, or adapt")) 
 Assert ($skillContent.Contains("Fidelity does not expand scope")) "Exact-copy bounded-scope policy missing"
 Assert ($skillContent.Contains("bounded copy manifest")) "Exact-copy manifest policy missing"
 Assert ($skillContent.Contains("enumerate the applicable scenes and explicit exclusions")) "Unity scene coverage policy missing"
+Assert ($skillContent.Contains("never report success while compilation is pending")) "Unity settled-compilation gate missing"
 
 $toolsetPolicy = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\skills\lightflow\references\toolsets.md")
 foreach ($requiredText in @("go.work", "go.mod", "go list -m -json all", "GOPROXY=off", "GOMODCACHE", "package.json", "Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "README.md", "missing or insufficient")) {
@@ -115,7 +116,7 @@ $required = @(
     "incomplete-refactor", "project-port", "reuse-toolset", "reuse-unity-package-cache", "local-capability",
     "propose-reusable-capability", "unapproved-toolset-mutation", "approved-toolset-api",
     "plan-complete-architecture", "plan-unresolved-design", "unity-source-only",
-    "unity-runtime-state", "unity-reference-bootstrap", "exact-system-copy", "unity-complete-scene-integration",
+    "unity-runtime-state", "unity-reference-bootstrap", "exact-system-copy", "unity-complete-scene-integration", "unity-compilation-settle",
     "go-nakama-normal", "critical-precision", "normal-feature-no-ceremony"
 )
 $scenarioIds = @($scenarios | ForEach-Object { $_.id })
@@ -168,6 +169,11 @@ $completeUnity = $scenarios | Where-Object id -eq "unity-complete-scene-integrat
 Assert (@($completeUnity.route).Count -eq 0) "Normal complete Unity integration must stay in the primary agent"
 foreach ($tool in @("scene-inventory", "explicit-scene-exclusion", "helper-and-asset-coverage", "pipeline-coverage", "unity-editor")) {
     Assert ($tool -in @($completeUnity.tools)) "Complete Unity integration missing coverage check: $tool"
+}
+$unityCompile = $scenarios | Where-Object id -eq "unity-compilation-settle"
+Assert (@($unityCompile.route).Count -eq 0) "Normal Unity compilation validation must stay in the primary agent"
+foreach ($tool in @("unity-editor", "asset-refresh", "observe-compilation", "wait-for-editor-idle", "post-compile-console-errors", "repeat-after-fix")) {
+    Assert ($tool -in @($unityCompile.tools)) "Unity compilation validation missing gate: $tool"
 }
 $goScenario = $scenarios | Where-Object id -eq "go-nakama-normal"
 Assert ("go-test" -in @($goScenario.tools)) "Go/Nakama work must use native tests"

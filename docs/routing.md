@@ -15,4 +15,6 @@ Normal work uses at most one custom specialist unless it becomes materially bloc
 
 Cross-project work also classifies reference intent. Explicit copy/identical/unchanged language requires exact replication with source-parity validation and no cleanup, minimization, interface changes, or behavioral adaptation. Exactness never widens scope: copy only the named system and strictly required dependency closure, use a bounded copy manifest, and reject unrelated changes. Requests to check other systems are read-only. “Use project A's setup/base” preserves the complete reusable source structure and extension points while excluding only product-specific behavior. Adaptation is allowed only when requested or forced by an evidenced incompatibility.
 
+Unity completion is state-based: after Unity-affecting edits, refresh when needed, wait until importing/compilation is actually idle, then inspect the final-cycle Console. A fixed delay or an earlier Console snapshot is not proof of successful compilation.
+
 The scenario matrix in `evals/routing-scenarios.json` covers the required feature, bugfix, refactor, integration, planning, dependency/toolset, Unity, Go/Nakama, and critical-work routes. `evals/validate.ps1` checks those contracts without a model; `evals/run-behavioral.ps1` runs the prompts against Codex and includes a real write-and-verify smoke task.

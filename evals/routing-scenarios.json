@@ -200,9 +200,21 @@
     "risk": "NORMAL",
     "planMode": false,
     "route": [],
-    "tools": ["scene-inventory", "explicit-scene-exclusion", "helper-and-asset-coverage", "pipeline-coverage", "unity-editor"],
+    "tools": ["scene-inventory", "explicit-scene-exclusion", "helper-and-asset-coverage", "pipeline-coverage", "unity-editor", "asset-refresh", "wait-for-editor-idle", "post-compile-console-errors"],
     "skills": ["applicable-installed-unity-skill"],
     "decision": "primary-integrates-complete-cohesive-system-and-validates-every-applicable-scene"
+  },
+  {
+    "id": "unity-compilation-settle",
+    "prompt": "Make this Unity change and validate it. Do not finish while Unity is compiling; wait for compilation to settle and check the errors afterward.",
+    "workType": "FEATURE",
+    "architecture": "EXISTING",
+    "risk": "NORMAL",
+    "planMode": false,
+    "route": [],
+    "tools": ["unity-editor", "asset-refresh", "observe-compilation", "wait-for-editor-idle", "post-compile-console-errors", "repeat-after-fix"],
+    "skills": ["applicable-installed-unity-skill"],
+    "decision": "primary-waits-for-settled-editor-and-checks-final-console"
   },
   {
     "id": "go-nakama-normal",
