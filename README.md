@@ -16,13 +16,13 @@ Lightflow is a small, team-shareable Codex plugin and repository scaffold for na
 2. Configure a target repository from this checkout:
 
    ```bat
-   scripts\setup.bat C:\path\to\project balanced
+   scripts\setup.bat C:\path\to\project refined-balanced
    ```
 
-   Profiles are `balanced` (default), `quality`, and `economy`. To change only model settings later:
+   Profiles are `refined-balanced` (recommended), `balanced` (legacy default), `quality`, and `economy`. To change only model settings later:
 
    ```bat
-   scripts\setup.bat C:\path\to\project quality --profile-only
+   scripts\setup.bat C:\path\to\project refined-balanced --profile-only
    ```
 
 3. Open the project in ChatGPT/Codex and speak naturally:

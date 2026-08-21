@@ -1,6 +1,6 @@
 {
   "name": "lightflow",
-  "version": "0.2.0+codex.20260820204916",
+  "version": "0.3.0",
   "description": "Route natural software-development requests through the smallest reliable Codex workflow.",
   "author": {
     "name": "Lightflow contributors"

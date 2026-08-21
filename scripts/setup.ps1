@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$TargetRepository,
 
-    [ValidateSet("balanced", "quality", "economy")]
+    [ValidateSet("refined-balanced", "balanced", "quality", "economy")]
     [string]$Profile = "balanced",
 
     [switch]$ProfileOnly
@@ -176,7 +176,7 @@ $expected = @($configPath) + @($roles | ForEach-Object { Join-Path $agentsDir "$
 foreach ($path in $expected) {
     $content = Get-Content -Raw -LiteralPath $path
     if ($content -notmatch '(?m)^model\s*=\s*"gpt-5\.6-(?:sol|terra|luna)"\s*$' -or
-        $content -notmatch '(?m)^model_reasoning_effort\s*=\s*"(?:medium|high|xhigh)"\s*$') {
+        $content -notmatch '(?m)^model_reasoning_effort\s*=\s*"(?:low|medium|high|xhigh)"\s*$') {
         throw "Generated model configuration failed validation: $path"
     }
 }

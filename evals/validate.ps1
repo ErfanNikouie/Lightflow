@@ -50,6 +50,9 @@ $skillPath = Join-Path $root "plugins\lightflow\skills\lightflow\SKILL.md"
 $skillContent = Get-Content -Raw -LiteralPath $skillPath
 Assert ($skillContent -match '(?m)^name:\s*lightflow\s*$') "Bundled skill name mismatch"
 Assert ($skillContent.Contains("inherit the parent session's available skills")) "Skill inheritance policy missing"
+Assert ($skillContent.Contains("Exact replication") -and $skillContent.Contains("Template replication") -and $skillContent.Contains("Adaptation")) "Reference-intent routing policy missing"
+Assert ($skillContent.Contains("do not rewrite, minimize, redesign, or adapt")) "Exact-copy fidelity boundary missing"
+Assert ($skillContent.Contains("enumerate the applicable scenes and explicit exclusions")) "Unity scene coverage policy missing"
 
 $toolsetPolicy = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\skills\lightflow\references\toolsets.md")
 foreach ($requiredText in @("go.work", "go.mod", "go list -m -json all", "GOPROXY=off", "GOMODCACHE", "package.json", "Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "README.md", "missing or insufficient")) {
@@ -90,7 +93,7 @@ if (Get-Command codex -ErrorAction SilentlyContinue) {
     Write-Warning "Codex CLI is unavailable; live model-catalog validation was skipped."
 }
 
-foreach ($profileName in @("balanced", "quality", "economy")) {
+foreach ($profileName in @("refined-balanced", "balanced", "quality", "economy")) {
     $profile = Get-Content -Raw -LiteralPath (Join-Path $root "profiles\$profileName.json") | ConvertFrom-Json
     Assert ((($profile.PSObject.Properties.Name | Sort-Object) -join ",") -eq (($profileRoles | Sort-Object) -join ",")) "Profile role mismatch: $profileName"
     foreach ($role in $profileRoles) {
@@ -98,7 +101,7 @@ foreach ($profileName in @("balanced", "quality", "economy")) {
         if ($null -ne $availableModelIds) {
             Assert ($profile.$role.model -in $availableModelIds) "Unavailable model in $profileName/${role}: $($profile.$role.model)"
         }
-        Assert ($profile.$role.reasoning -match '^(medium|high|xhigh)$') "Invalid reasoning in $profileName/$role"
+        Assert ($profile.$role.reasoning -match '^(low|medium|high|xhigh)$') "Invalid reasoning in $profileName/$role"
     }
 }
 
@@ -110,7 +113,8 @@ $required = @(
     "incomplete-refactor", "project-port", "reuse-toolset", "reuse-unity-package-cache", "local-capability",
     "propose-reusable-capability", "unapproved-toolset-mutation", "approved-toolset-api",
     "plan-complete-architecture", "plan-unresolved-design", "unity-source-only",
-    "unity-runtime-state", "go-nakama-normal", "critical-precision", "normal-feature-no-ceremony"
+    "unity-runtime-state", "unity-reference-bootstrap", "exact-system-copy", "unity-complete-scene-integration",
+    "go-nakama-normal", "critical-precision", "normal-feature-no-ceremony"
 )
 $scenarioIds = @($scenarios | ForEach-Object { $_.id })
 Assert (@($required | Where-Object { $_ -notin $scenarioIds }).Count -eq 0) "Required routing scenarios are missing"
@@ -125,7 +129,7 @@ foreach ($scenario in $scenarios) {
         Assert ($role -in $spawnable) "Unknown or redundant orchestrator route in $($scenario.id): $role"
     }
     if ($scenario.workType -eq "TRIVIAL") {
-        Assert ((@($scenario.route) -join ",") -eq "worker") "Trivial work must use Worker only: $($scenario.id)"
+        Assert (@($scenario.route).Count -eq 0) "Trivial work must stay in the primary agent: $($scenario.id)"
     }
     if ($scenario.planMode) {
         Assert ("worker" -notin @($scenario.route)) "Plan Mode must not invoke Worker: $($scenario.id)"
@@ -147,6 +151,22 @@ Assert ("applicable-installed-unity-skill" -in @($unitySource.skills)) "Pure Uni
 $unityRuntime = $scenarios | Where-Object id -eq "unity-runtime-state"
 Assert ("unity-editor" -in @($unityRuntime.tools)) "Unity runtime state requires editor tooling"
 Assert ("applicable-installed-unity-skill" -in @($unityRuntime.skills)) "Unity runtime work must use applicable installed Unity skills"
+$unityReference = $scenarios | Where-Object id -eq "unity-reference-bootstrap"
+Assert (@($unityReference.route).Count -eq 0) "Normal Unity reference integration must stay in the primary agent"
+foreach ($tool in @("source-project", "target-project", "unity-editor", "reference-checklist", "reuse-existing-assets")) {
+    Assert ($tool -in @($unityReference.tools)) "Unity reference integration missing contract: $tool"
+}
+$exactCopy = $scenarios | Where-Object id -eq "exact-system-copy"
+Assert (@($exactCopy.route).Count -eq 0) "Normal exact replication must stay in the primary agent"
+Assert ($exactCopy.architecture -eq "USER_COMPLETE") "Exact source implementation must be treated as complete architecture"
+foreach ($tool in @("source-target-file-diff", "public-api-parity", "structure-parity", "serialized-wiring-parity")) {
+    Assert ($tool -in @($exactCopy.tools)) "Exact replication missing parity check: $tool"
+}
+$completeUnity = $scenarios | Where-Object id -eq "unity-complete-scene-integration"
+Assert (@($completeUnity.route).Count -eq 0) "Normal complete Unity integration must stay in the primary agent"
+foreach ($tool in @("scene-inventory", "explicit-scene-exclusion", "helper-and-asset-coverage", "pipeline-coverage", "unity-editor")) {
+    Assert ($tool -in @($completeUnity.tools)) "Complete Unity integration missing coverage check: $tool"
+}
 $goScenario = $scenarios | Where-Object id -eq "go-nakama-normal"
 Assert ("go-test" -in @($goScenario.tools)) "Go/Nakama work must use native tests"
 $reuseToolset = $scenarios | Where-Object id -eq "reuse-toolset"
@@ -161,7 +181,11 @@ Assert ("applicable-installed-unity-skill" -in @($reuseUnityPackage.skills)) "Un
 $refactor = $scenarios | Where-Object id -eq "incomplete-refactor"
 Assert ("ponytail" -in @($refactor.skills)) "Meaningful refactor must apply Ponytail when available"
 $normalFeature = $scenarios | Where-Object id -eq "normal-feature-no-ceremony"
-Assert ((@($normalFeature.route) -join ",") -eq "worker") "Normal feature is over-delegated"
+Assert (@($normalFeature.route).Count -eq 0) "Normal feature is over-delegated"
+$normalScenarios = @($scenarios | Where-Object { $_.risk -in @("LOW", "NORMAL") -and -not $_.planMode })
+foreach ($scenario in $normalScenarios) {
+    Assert (@($scenario.route).Count -le 1) "Low/normal work exceeds the default one-specialist budget: $($scenario.id)"
+}
 $approvedApi = $scenarios | Where-Object id -eq "approved-toolset-api"
 Assert ($approvedApi.risk -eq "HIGH" -and "architect" -in @($approvedApi.route) -and "reviewer" -in @($approvedApi.route)) "Approved public toolset API flow is under-protected"
 
@@ -190,14 +214,14 @@ try {
     $workerBefore = (Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\agents\worker.toml")) -replace '(?m)^model(?:_reasoning_effort)?\s*=.*\r?\n?', ''
     $backupCount = @(Get-ChildItem -LiteralPath $tempRoot -Recurse -Filter "*.lightflow-backup-*").Count
 
-    & (Join-Path $root "scripts\setup.ps1") -TargetRepository $tempRoot -Profile quality -ProfileOnly | Out-Null
+    & (Join-Path $root "scripts\setup.ps1") -TargetRepository $tempRoot -Profile refined-balanced -ProfileOnly | Out-Null
     Assert ((Get-Content -Raw -LiteralPath (Join-Path $tempRoot "AGENTS.md")) -eq $agentsBefore) "Profile-only changed AGENTS.md"
     Assert (@(Get-ChildItem -LiteralPath $tempRoot -Recurse -Filter "*.lightflow-backup-*").Count -eq $backupCount) "Profile-only created unrelated backups"
     $workerAfter = (Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\agents\worker.toml")) -replace '(?m)^model(?:_reasoning_effort)?\s*=.*\r?\n?', ''
     Assert ($workerAfter -eq $workerBefore) "Profile-only changed Worker instructions"
     $explorer = Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\agents\explorer.toml")
-    Assert ($explorer -match '(?m)^model\s*=\s*"gpt-5\.6-terra"\s*$') "Quality Explorer model was not applied"
-    Assert ($explorer -match '(?m)^model_reasoning_effort\s*=\s*"high"\s*$') "Quality Explorer reasoning was not applied"
+    Assert ($explorer -match '(?m)^model\s*=\s*"gpt-5\.6-luna"\s*$') "Refined Balanced Explorer model was not applied"
+    Assert ($explorer -match '(?m)^model_reasoning_effort\s*=\s*"low"\s*$') "Refined Balanced Explorer reasoning was not applied"
 
     Test-TomlSubset (Join-Path $tempRoot ".codex\config.toml")
     foreach ($role in $roles) { Test-TomlSubset (Join-Path $tempRoot ".codex\agents\$role.toml") }

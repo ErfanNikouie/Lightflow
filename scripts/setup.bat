@@ -13,5 +13,5 @@ if /I "%~3"=="--profile-only" (
 exit /b %ERRORLEVEL%
 
 :usage
-echo Usage: setup.bat ^<target-repository^> [balanced^|quality^|economy] [--profile-only]
+echo Usage: setup.bat ^<target-repository^> [refined-balanced^|balanced^|quality^|economy] [--profile-only]
 exit /b 2

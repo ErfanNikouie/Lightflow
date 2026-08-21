@@ -19,7 +19,7 @@ Start a new Codex task after reinstalling the plugin.
 Do not use `--profile-only` for the first migration run:
 
 ```bat
-scripts\setup.bat C:\path\to\project balanced
+scripts\setup.bat C:\path\to\project refined-balanced
 ```
 
 The full run updates the managed `AGENTS.md` block and model IDs, installs Explorer, Architect, Worker, and Reviewer, and backs up then removes the obsolete `.codex/agents/orchestrator.toml`. The primary Codex agent remains Orchestrator. Existing changed files receive timestamped `.lightflow-backup-*` copies.
@@ -57,7 +57,7 @@ $projects = @(
 )
 
 foreach ($project in $projects) {
-    & .\scripts\setup.ps1 -TargetRepository $project -Profile balanced
+    & .\scripts\setup.ps1 -TargetRepository $project -Profile refined-balanced
 }
 ```
 
@@ -68,4 +68,4 @@ Get-ChildItem C:\path\to\project\.codex\agents -Filter *.toml
 Select-String -Path C:\path\to\project\.codex\config.toml -Pattern '^model'
 ```
 
-Expected specialists are `explorer.toml`, `architect.toml`, `worker.toml`, and `reviewer.toml`. The root model should be `gpt-5.6-sol` for Balanced or Quality, or `gpt-5.6-terra` for Economy. Project-local skills such as `.codex/skills/*` and unrelated manifests are not changed by setup.
+Expected specialists are `explorer.toml`, `architect.toml`, `worker.toml`, and `reviewer.toml`. The root model should be `gpt-5.6-sol` for Refined Balanced, Balanced, or Quality, and `gpt-5.6-terra` for Economy. Project-local skills such as `.codex/skills/*` and unrelated manifests are not changed by setup.

@@ -23,7 +23,7 @@ Restart the ChatGPT desktop app and use a new task after plugin updates so new s
 Run from this repository:
 
 ```bat
-scripts\setup.bat C:\path\to\project balanced
+scripts\setup.bat C:\path\to\project refined-balanced
 ```
 
 The script resolves the target path, merges a marked block into `AGENTS.md`, preserves unrelated `.codex/config.toml` values, writes the four managed specialist files, removes the obsolete custom Orchestrator after backing it up, injects the chosen profile, validates expected fields, and prints a summary. Existing files that the install/update path changes receive timestamped `.lightflow-backup-*` copies.
@@ -31,7 +31,7 @@ The script resolves the target path, merges a marked block into `AGENTS.md`, pre
 Change only model fields later:
 
 ```bat
-scripts\setup.bat C:\path\to\project quality --profile-only
+scripts\setup.bat C:\path\to\project refined-balanced --profile-only
 ```
 
 The profile-only path requires an existing scaffold and does not reinstall instructions or role behavior.
