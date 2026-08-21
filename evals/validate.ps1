@@ -49,13 +49,14 @@ Assert ($manifest.PSObject.Properties.Name -notcontains "mcpServers") "Unused MC
 $skillPath = Join-Path $root "plugins\lightflow\skills\lightflow\SKILL.md"
 $skillContent = Get-Content -Raw -LiteralPath $skillPath
 Assert ($skillContent -match '(?m)^name:\s*lightflow\s*$') "Bundled skill name mismatch"
-Assert ($skillContent.Contains("inherit the parent session's available skills")) "Skill inheritance policy missing"
+Assert ($skillContent.Contains("Use one Explorer when")) "Cost-aware Explorer routing policy missing"
+Assert ($skillContent.Contains("MCP/app tools") -and $skillContent.Contains("only when the user explicitly requests")) "Operational-tool opt-in policy missing"
 Assert ($skillContent.Contains("Exact replication") -and $skillContent.Contains("Template replication") -and $skillContent.Contains("Adaptation")) "Reference-intent routing policy missing"
 Assert ($skillContent.Contains("do not rewrite, minimize, redesign, or adapt")) "Exact-copy fidelity boundary missing"
 Assert ($skillContent.Contains("Fidelity does not expand scope")) "Exact-copy bounded-scope policy missing"
 Assert ($skillContent.Contains("bounded copy manifest")) "Exact-copy manifest policy missing"
 Assert ($skillContent.Contains("enumerate the applicable scenes and explicit exclusions")) "Unity scene coverage policy missing"
-Assert ($skillContent.Contains("never report success while compilation is pending")) "Unity settled-compilation gate missing"
+Assert ($skillContent.Contains("Enter Play Mode") -and $skillContent.Contains("only when explicitly requested")) "Unity execution opt-in boundary missing"
 
 $toolsetPolicy = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\skills\lightflow\references\toolsets.md")
 foreach ($requiredText in @("go.work", "go.mod", "go list -m -json all", "GOPROXY=off", "GOMODCACHE", "package.json", "Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "README.md", "missing or insufficient")) {
@@ -67,6 +68,7 @@ Assert ($authorityPolicy.Contains("Ponytail applies implicitly")) "Implicit Pony
 $explorerTemplate = Get-Content -Raw -LiteralPath (Join-Path $root "scaffold\.codex\agents\explorer.toml")
 Assert ($explorerTemplate.Contains("README.md first")) "Explorer README-first policy missing"
 Assert ($explorerTemplate.Contains("Library/PackageCache") -and $explorerTemplate.Contains("GOMODCACHE")) "Explorer native dependency-cache discovery missing"
+Assert ($explorerTemplate.Contains("line numbers") -and $explorerTemplate.Contains("inference separately")) "Explorer evidence contract missing"
 
 $marketplace = Get-Content -Raw -LiteralPath (Join-Path $root ".agents\plugins\marketplace.json") | ConvertFrom-Json
 Assert ($marketplace.name -eq "lightflow") "Marketplace name mismatch"
@@ -143,6 +145,7 @@ foreach ($scenario in $scenarios) {
     if ($scenario.risk -eq "LOW") {
         Assert ("reviewer" -notin @($scenario.route)) "Low-risk work should skip Reviewer: $($scenario.id)"
     }
+    Assert (@($scenario.route | Where-Object { $_ -ne "explorer" }).Count -eq 0) "Default scenarios may route only to Explorer: $($scenario.id)"
     if ($scenario.PSObject.Properties.Name -contains "stopBeforeMutation" -and $scenario.stopBeforeMutation) {
         Assert ("worker" -notin @($scenario.route)) "Unapproved toolset mutation must stop before Worker: $($scenario.id)"
     }
@@ -155,20 +158,24 @@ $unityRuntime = $scenarios | Where-Object id -eq "unity-runtime-state"
 Assert ("unity-editor" -in @($unityRuntime.tools)) "Unity runtime state requires editor tooling"
 Assert ("applicable-installed-unity-skill" -in @($unityRuntime.skills)) "Unity runtime work must use applicable installed Unity skills"
 $unityReference = $scenarios | Where-Object id -eq "unity-reference-bootstrap"
-Assert (@($unityReference.route).Count -eq 0) "Normal Unity reference integration must stay in the primary agent"
-foreach ($tool in @("source-project", "target-project", "unity-editor", "reference-checklist", "reuse-existing-assets")) {
+Assert ((@($unityReference.route) -join ",") -eq "explorer") "Unity reference integration should use one cheap read-only Explorer"
+foreach ($tool in @("source-project", "target-project", "reference-checklist", "reuse-existing-assets")) {
     Assert ($tool -in @($unityReference.tools)) "Unity reference integration missing contract: $tool"
 }
+Assert ("unity-editor" -notin @($unityReference.tools)) "Unity reference integration must not invoke the editor without an explicit request"
 $exactCopy = $scenarios | Where-Object id -eq "exact-system-copy"
-Assert (@($exactCopy.route).Count -eq 0) "Normal exact replication must stay in the primary agent"
+Assert ((@($exactCopy.route) -join ",") -eq "explorer") "Exact replication should use one cheap read-only Explorer"
 Assert ($exactCopy.architecture -eq "USER_COMPLETE") "Exact source implementation must be treated as complete architecture"
 foreach ($tool in @("bounded-copy-manifest", "dependency-reasons", "explicit-exclusions", "read-only-sibling-audit", "source-target-file-diff", "public-api-parity", "structure-parity", "serialized-wiring-parity", "changed-file-scope-check")) {
     Assert ($tool -in @($exactCopy.tools)) "Exact replication missing parity check: $tool"
 }
 $completeUnity = $scenarios | Where-Object id -eq "unity-complete-scene-integration"
-Assert (@($completeUnity.route).Count -eq 0) "Normal complete Unity integration must stay in the primary agent"
-foreach ($tool in @("scene-inventory", "explicit-scene-exclusion", "helper-and-asset-coverage", "pipeline-coverage", "unity-editor")) {
+Assert ((@($completeUnity.route) -join ",") -eq "explorer") "Complete Unity integration should use one cheap read-only Explorer"
+foreach ($tool in @("scene-inventory", "explicit-scene-exclusion", "helper-and-asset-coverage", "pipeline-coverage")) {
     Assert ($tool -in @($completeUnity.tools)) "Complete Unity integration missing coverage check: $tool"
+}
+foreach ($tool in @("unity-editor", "asset-refresh", "wait-for-editor-idle", "post-compile-console-errors")) {
+    Assert ($tool -notin @($completeUnity.tools)) "Unity integration invoked unrequested operational tool: $tool"
 }
 $unityCompile = $scenarios | Where-Object id -eq "unity-compilation-settle"
 Assert (@($unityCompile.route).Count -eq 0) "Normal Unity compilation validation must stay in the primary agent"
@@ -176,7 +183,7 @@ foreach ($tool in @("unity-editor", "asset-refresh", "observe-compilation", "wai
     Assert ($tool -in @($unityCompile.tools)) "Unity compilation validation missing gate: $tool"
 }
 $goScenario = $scenarios | Where-Object id -eq "go-nakama-normal"
-Assert ("go-test" -in @($goScenario.tools)) "Go/Nakama work must use native tests"
+Assert ($goScenario.PSObject.Properties.Name -notcontains "tools") "Go/Nakama work must not run unrequested tests"
 $reuseToolset = $scenarios | Where-Object id -eq "reuse-toolset"
 foreach ($tool in @("go.mod", "go-list-offline", "GOMODCACHE", "README-first", "source-fallback")) {
     Assert ($tool -in @($reuseToolset.tools)) "Toolset discovery scenario missing: $tool"
@@ -195,7 +202,11 @@ foreach ($scenario in $normalScenarios) {
     Assert (@($scenario.route).Count -le 1) "Low/normal work exceeds the default one-specialist budget: $($scenario.id)"
 }
 $approvedApi = $scenarios | Where-Object id -eq "approved-toolset-api"
-Assert ($approvedApi.risk -eq "HIGH" -and "architect" -in @($approvedApi.route) -and "reviewer" -in @($approvedApi.route)) "Approved public toolset API flow is under-protected"
+Assert ($approvedApi.risk -eq "HIGH" -and (@($approvedApi.route) -join ",") -eq "explorer") "Approved public toolset API flow should use one Explorer and primary reasoning"
+
+$refinedProfile = Get-Content -Raw -LiteralPath (Join-Path $root "profiles\refined-balanced.json") | ConvertFrom-Json
+Assert ($refinedProfile.orchestrator.model -eq "gpt-5.6-sol" -and $refinedProfile.orchestrator.reasoning -eq "medium") "Refined Balanced primary must remain Sol medium"
+Assert ($refinedProfile.explorer.model -eq "gpt-5.6-luna" -and $refinedProfile.explorer.reasoning -eq "low") "Refined Balanced Explorer must remain Luna low"
 
 $tempBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $tempRoot = Join-Path $tempBase ("lightflow-eval-" + [guid]::NewGuid().ToString("N"))

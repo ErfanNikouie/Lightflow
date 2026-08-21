@@ -32,7 +32,7 @@ Lightflow is a small, team-shareable Codex plugin and repository scaffold for na
    - “Port the leaderboard implementation from repository A, but reuse our shared Go economy module.”
    - “Plan this first. I already decided how persistence works.”
 
-The workflow does not require users to name agents, skills, MCPs, or validation steps.
+The workflow does not require users to name agents for ordinary work. Operational tools and execution validation are opt-in: ask for tests, builds, Play Mode, Console checks, browser/editor automation, or another live operation when you want it run.
 
 ## What gets installed
 
@@ -46,7 +46,7 @@ See [installation](docs/installation.md), [migration](docs/migration.md), [archi
 
 No toolset registration is required. Explorer follows Unity's `Packages/manifest.json` and `Packages/packages-lock.json` into embedded/local packages and `Library/PackageCache`. For Go it follows `go.work`, `go.mod`, replacements/vendor, and `GOMODCACHE`, using `go list -m -json all` only with `GOPROXY=off`. It reads each relevant resolved package/module `README.md` first and inspects the smallest necessary public API, source, and tests only when documentation is absent or insufficient.
 
-Lightflow uses applicable skills already available in the current Codex installation, including Unity/vendor/project skills. Its custom agents inherit the parent skill configuration. Ponytail principles are implicit, and installed Ponytail review skills are used only when deeper simplicity review is worthwhile. These skills are not bundled: teammates get the same integration when they install/enable the same skills, while Lightflow falls back to native tooling when they do not.
+Lightflow uses a named or clearly necessary skill already available in the current Codex installation without chaining skills merely because they exist. Its custom agents inherit the parent skill configuration. Ponytail principles are implicit. These skills are not bundled: teammates get the same integration when they install/enable the same skills, while Lightflow falls back to repository guidance when they do not.
 
 ## Platform adaptation
 

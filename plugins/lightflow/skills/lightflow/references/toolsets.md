@@ -24,10 +24,6 @@ Implement project-specific behavior locally. For broadly reusable behavior, prop
 
 Reading and proposing are allowed. Never edit `Library/PackageCache`, `GOMODCACHE`, or vendored/generated dependency copies. To change a shared toolset, locate its writable source repository and obtain explicit approval for that repository change. General permission to implement the current project or update its dependency manifest is not approval to mutate shared source.
 
-After approval:
-
-- Public or architectural toolset change: Explorer → Architect (`xhigh`) → Worker → Reviewer.
-- Promotion from project into toolset: source Explorer + toolset Explorer → Architect → Worker → Reviewer.
-- Existing capability integration: target/toolset exploration as needed → Architect only for nontrivial adaptation → Worker.
+After approval, use one Explorer for non-trivial package/consumer discovery and let the primary agent design, implement, and inspect the change. Architect, Worker, Reviewer, and parallel Explorers require an explicit user request or a concrete need that remains after primary reasoning.
 
 Public/shared API changes are at least `HIGH` risk. Prefer pinned/released versions where supported; upgrading consumers is a separate integration task.

@@ -4,12 +4,12 @@ Classify independently across the dimensions below. Classification exists to red
 
 ## Work type
 
-- `FEATURE`: new behavior. Implement directly when clear; use Explorer only for substantial missing context, Architect only for unresolved material design or risk, custom Worker only for useful handoff/isolation, and Reviewer when high-risk or explicitly requested.
-- `BUGFIX`: reproduce, trace callers, fix the root cause, and validate directly when practical. Use Explorer only when a bounded investigation merits a separate context. Architect only if investigation reveals material architecture.
-- `REFACTOR`: preserve observable behavior unless told otherwise. Implement clear low/normal refactors directly. For meaningful unresolved or high-risk work, use Explorer/Architect as needed, then either primary implementation or a custom Worker, followed by conditional review.
-- `INTEGRATION`: the implementing agent normally inspects source and target in one coherent pass. Apply the reference-intent rules below before changing source structure or contracts. Split read-only exploration only when the mapping is genuinely large or parallel savings justify quota; use Architect for nontrivial unresolved mapping and Reviewer for high-risk integration.
-- `ARCHITECTURE`: Explorer when repository facts are needed, then Architect. Return a plan/design; implement only when requested.
-- `TRIVIAL`: primary agent implements directly with lightweight verification and no custom specialist.
+- `FEATURE`: new behavior. Use Explorer when locating or tracing the affected flow is non-trivial, then let the primary agent reason and implement.
+- `BUGFIX`: use Explorer to trace the failing flow and callers unless they are already localized, then let the primary agent fix the root cause. Reproduce or run validation only when requested.
+- `REFACTOR`: preserve observable behavior unless told otherwise. Use Explorer for non-trivial boundary/caller mapping; resolve design and implement in the primary context.
+- `INTEGRATION`: use Explorer for non-trivial source/target and dependency mapping, then let the primary agent apply the reference-intent rules and implement.
+- `ARCHITECTURE`: use Explorer when repository facts are needed, then design in the primary context. Return a plan/design; implement only when requested.
+- `TRIVIAL`: primary agent implements directly, inspects the diff, and uses no custom specialist.
 
 ## Architecture completeness
 
@@ -30,19 +30,19 @@ If wording mixes these modes, the more explicit fidelity instruction wins withou
 
 - `LOW`: no Reviewer unless explicitly requested.
 - `NORMAL`: no Reviewer by default; use one only for a concrete unresolved correctness concern or explicit request.
-- `HIGH`: normally Reviewer. Includes concurrency, network authority, persistence integrity, public/shared API change, schema migration, authentication/authorization, security boundaries, or economy/currency.
-- `CRITICAL`: Reviewer plus an Architect precision audit when useful. Natural phrases such as “critical,” “maximum precision,” or “be extremely careful” raise this level.
+- `HIGH`: apply extra care in the primary context. Includes concurrency, network authority, persistence integrity, public/shared API change, schema migration, authentication/authorization, security boundaries, or economy/currency.
+- `CRITICAL`: perform a precision audit in the primary context. Natural phrases such as “critical,” “maximum precision,” or “be extremely careful” raise this level. Risk alone does not authorize delegation.
 
 ## Plan Mode
 
 Plan Mode changes the deliverable, not the architecture classification:
 
 1. Orchestrator analyzes.
-2. Explorer investigates only when needed.
-3. Architect runs only for `USER_PARTIAL`, `UNSPECIFIED`, material risk, or explicit request.
+2. Use Explorer when non-trivial repository facts are needed.
+3. Resolve design in the primary context.
 4. Return a concrete implementation plan.
 5. Do not invoke Worker or modify production code.
-6. Review only high/critical plans or when requested.
+6. Review in the primary context unless a separate review was requested.
 
 An approved plan becomes implementation authority. Worker does not redo it unless implementation exposes a material contradiction.
 
@@ -50,10 +50,9 @@ An approved plan becomes implementation authority. Worker does not redo it unles
 
 Routes list extra custom-specialist contexts; direct primary-agent work has an empty route.
 
-- `LOW` and clear `NORMAL`: no custom specialist by default.
-- Bounded missing fact or isolated long-running implementation: at most one custom specialist by default.
-- `HIGH` and `CRITICAL`: use the specialists needed for correctness, but do not repeat discovery or review.
-- Parallelism is a quota-for-time tradeoff. Use it only when independent work materially shortens the critical path.
+- Default route is empty for trivial or already-localized work and one Explorer for non-trivial repository investigation.
+- Architect, Worker, and Reviewer require an explicit user request or a concrete need that remains after primary reasoning.
+- Multiple specialists or parallelism require an explicit user request.
 
 ## Handoffs
 

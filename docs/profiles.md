@@ -10,7 +10,7 @@ Profile values are centralized in `profiles/*.json` and use current Codex GPT-5.
 | Worker | Terra medium | Sol medium | Sol high | Terra medium |
 | Reviewer | Terra high | Sol high | Sol xhigh | Terra high |
 
-`refined-balanced` is recommended for the best quality/quota tradeoff: direct work retains Sol medium, while rarely needed supporting contexts use cheaper settings. Its main savings come from the one-agent routing policy, not from weakening the agent that handles ordinary work. `balanced` remains the setup-script default for compatibility. Edit the JSON files to tune a team fork; role instructions remain unchanged. Switch an installed repository without reinstalling other scaffold files:
+`refined-balanced` is recommended for the best quality/quota tradeoff: the primary remains Sol medium, while Luna low handles non-trivial read-only repository exploration. Sol keeps the reasoning and implementation work without spending its context on broad file tracing. `balanced` remains the setup-script default for compatibility. Edit the JSON files to tune a team fork; role instructions remain unchanged. Switch an installed repository without reinstalling other scaffold files:
 
 ```bat
 scripts\setup.bat C:\path\to\project refined-balanced --profile-only

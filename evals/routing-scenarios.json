@@ -7,7 +7,7 @@
     "risk": "LOW",
     "planMode": false,
     "route": [],
-    "decision": "primary-implements-and-lightly-verifies"
+    "decision": "primary-implements-and-inspects-diff"
   },
   {
     "id": "failing-rpc",
@@ -16,8 +16,8 @@
     "architecture": "EXISTING",
     "risk": "NORMAL",
     "planMode": false,
-    "route": [],
-    "decision": "primary-reproduces-root-cause-fixes-and-validates"
+    "route": ["explorer"],
+    "decision": "explorer-traces-primary-fixes-without-unrequested-execution"
   },
   {
     "id": "complete-user-architecture",
@@ -26,8 +26,8 @@
     "architecture": "USER_COMPLETE",
     "risk": "NORMAL",
     "planMode": false,
-    "route": [],
-    "decision": "primary-preserves-user-design"
+    "route": ["explorer"],
+    "decision": "explorer-maps-primary-preserves-user-design"
   },
   {
     "id": "partial-user-architecture",
@@ -36,8 +36,8 @@
     "architecture": "USER_PARTIAL",
     "risk": "HIGH",
     "planMode": false,
-    "route": ["architect", "worker", "reviewer"],
-    "decision": "architect-fills-gaps-only"
+    "route": ["explorer"],
+    "decision": "explorer-maps-primary-fills-gaps-only"
   },
   {
     "id": "incomplete-refactor",
@@ -46,7 +46,7 @@
     "architecture": "UNSPECIFIED",
     "risk": "HIGH",
     "planMode": false,
-    "route": ["explorer", "architect", "worker", "reviewer"],
+    "route": ["explorer"],
     "skills": ["ponytail"],
     "decision": "design-then-preserve-behavior"
   },
@@ -57,8 +57,8 @@
     "architecture": "EXISTING",
     "risk": "HIGH",
     "planMode": false,
-    "route": ["explorer", "explorer", "architect", "worker", "reviewer"],
-    "decision": "parallel-source-target-map"
+    "route": ["explorer"],
+    "decision": "single-explorer-maps-primary-integrates"
   },
   {
     "id": "reuse-toolset",
@@ -67,7 +67,7 @@
     "architecture": "EXISTING",
     "risk": "NORMAL",
     "planMode": false,
-    "route": [],
+    "route": ["explorer"],
     "tools": ["go.mod", "go-list-offline", "GOMODCACHE", "README-first", "source-fallback"],
     "decision": "reuse-resolved-go-module"
   },
@@ -78,7 +78,7 @@
     "architecture": "EXISTING",
     "risk": "NORMAL",
     "planMode": false,
-    "route": [],
+    "route": ["explorer"],
     "tools": ["Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "package.json", "README-first", "source-fallback"],
     "skills": ["applicable-installed-unity-skill"],
     "decision": "reuse-resolved-unity-package"
@@ -100,7 +100,7 @@
     "architecture": "USER_PARTIAL",
     "risk": "HIGH",
     "planMode": false,
-    "route": ["explorer", "architect"],
+    "route": ["explorer"],
     "decision": "propose-toolset-extension-and-request-approval",
     "stopBeforeMutation": true
   },
@@ -122,8 +122,8 @@
     "architecture": "USER_PARTIAL",
     "risk": "HIGH",
     "planMode": false,
-    "route": ["explorer", "architect", "worker", "reviewer"],
-    "decision": "approved-high-risk-toolset-change"
+    "route": ["explorer"],
+    "decision": "explorer-maps-primary-performs-approved-change"
   },
   {
     "id": "plan-complete-architecture",
@@ -142,8 +142,8 @@
     "architecture": "UNSPECIFIED",
     "risk": "HIGH",
     "planMode": true,
-    "route": ["explorer", "architect", "reviewer"],
-    "decision": "investigate-design-review-plan"
+    "route": ["explorer"],
+    "decision": "explorer-investigates-primary-designs-plan"
   },
   {
     "id": "unity-source-only",
@@ -176,10 +176,10 @@
     "architecture": "EXISTING",
     "risk": "NORMAL",
     "planMode": false,
-    "route": [],
-    "tools": ["source-project", "target-project", "unity-editor", "reference-checklist", "reuse-existing-assets"],
+    "route": ["explorer"],
+    "tools": ["source-project", "target-project", "reference-checklist", "reuse-existing-assets"],
     "skills": ["applicable-installed-unity-skill"],
-    "decision": "primary-maps-cohesive-reference-implements-and-validates-without-review"
+    "decision": "explorer-maps-primary-implements-and-inspects-without-review"
   },
   {
     "id": "exact-system-copy",
@@ -188,7 +188,7 @@
     "architecture": "USER_COMPLETE",
     "risk": "NORMAL",
     "planMode": false,
-    "route": [],
+    "route": ["explorer"],
     "tools": ["bounded-copy-manifest", "dependency-reasons", "explicit-exclusions", "read-only-sibling-audit", "source-target-file-diff", "public-api-parity", "structure-parity", "serialized-wiring-parity", "changed-file-scope-check"],
     "decision": "primary-exactly-replicates-only-the-named-system-and-required-dependency-closure"
   },
@@ -199,10 +199,10 @@
     "architecture": "EXISTING",
     "risk": "NORMAL",
     "planMode": false,
-    "route": [],
-    "tools": ["scene-inventory", "explicit-scene-exclusion", "helper-and-asset-coverage", "pipeline-coverage", "unity-editor", "asset-refresh", "wait-for-editor-idle", "post-compile-console-errors"],
+    "route": ["explorer"],
+    "tools": ["scene-inventory", "explicit-scene-exclusion", "helper-and-asset-coverage", "pipeline-coverage"],
     "skills": ["applicable-installed-unity-skill"],
-    "decision": "primary-integrates-complete-cohesive-system-and-validates-every-applicable-scene"
+    "decision": "explorer-maps-primary-integrates-and-inspects-every-applicable-scene"
   },
   {
     "id": "unity-compilation-settle",
@@ -223,9 +223,8 @@
     "architecture": "EXISTING",
     "risk": "NORMAL",
     "planMode": false,
-    "route": [],
-    "tools": ["go-test", "go-vet"],
-    "decision": "native-go-tooling"
+    "route": ["explorer"],
+    "decision": "explorer-maps-primary-implements-without-unrequested-tests"
   },
   {
     "id": "critical-precision",
@@ -234,8 +233,8 @@
     "architecture": "USER_PARTIAL",
     "risk": "CRITICAL",
     "planMode": false,
-    "route": ["explorer", "architect", "worker", "reviewer"],
-    "decision": "precision-design-implementation-review"
+    "route": ["explorer"],
+    "decision": "explorer-maps-primary-performs-precision-change"
   },
   {
     "id": "normal-feature-no-ceremony",
