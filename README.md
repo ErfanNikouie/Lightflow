@@ -1,6 +1,6 @@
 # Lightflow
 
-Lightflow is a small, team-shareable Codex and Claude Code plugin for natural software-development requests. It chooses the least expensive route that still protects correctness and architectural intent.
+Lightflow is a small, team-shareable Codex and Claude Code plugin for explicitly requested software-development workflows. It chooses the least expensive route that still protects correctness and architectural intent.
 
 ## Quick start
 
@@ -27,7 +27,7 @@ Lightflow is a small, team-shareable Codex and Claude Code plugin for natural so
    scripts\setup.bat C:\path\to\project refined-balanced --profile-only
    ```
 
-3. Open the project in ChatGPT/Codex and speak naturally.
+3. Open the project in ChatGPT/Codex and invoke Lightflow explicitly, for example: `Use Lightflow to implement player reconnect.`
 
 ### Claude Code
 
@@ -38,31 +38,35 @@ claude plugin marketplace add ErfanNikouie/Lightflow
 claude plugin install lightflow@lightflow
 ```
 
-The Claude plugin bundles the shared skill and four native agents, so no project scaffold is required. Speak naturally in the target repository:
+The Claude plugin bundles the shared skill and four native agents, so no project scaffold is required. Invoke Lightflow explicitly in the target repository:
 
-- “Implement player reconnect.”
-- “Refactor this service. Keep these three interfaces, but decide the remaining boundaries yourself.”
-- “Port the leaderboard implementation from repository A, but reuse our shared Go economy module.”
-- “Plan this first. I already decided how persistence works.”
+- “Use Lightflow to implement player reconnect.”
+- “Run Lightflow to refactor this service. Keep these three interfaces, but decide the remaining boundaries yourself.”
+- “Use Lightflow to port the leaderboard implementation from repository A, but reuse our shared Go economy module.”
+- “Use Lightflow to plan this first. I already decided how persistence works.”
 
-The workflow does not require users to name agents for ordinary work. Operational tools and execution validation are opt-in on both hosts: ask for tests, builds, Play Mode, Console checks, browser/editor automation, or another live operation when you want it run.
+`$lightflow` and `/lightflow:lightflow` are also affirmative invocations. Incidental mentions, criticism, questions about Lightflow, and negative instructions do not activate the workflow. Once active, the workflow does not require users to name internal agents. Operational tools and execution validation are opt-in on both hosts: ask for tests, builds, Play Mode, Console checks, browser/editor automation, or another live operation when you want it run.
 
 ## What gets installed
 
-- Codex: a managed `AGENTS.md` section, `.codex/config.toml` model settings, and four project specialists in `.codex/agents/`.
+- Codex: `.codex/config.toml` model settings and four project specialists in `.codex/agents/`. Setup removes obsolete Lightflow-managed `AGENTS.md` blocks but preserves unrelated project instructions.
 - Claude Code: the shared Lightflow skill plus four plugin agents; Explorer uses Haiku at low effort while the opt-in roles inherit the session model.
 
 See [installation](docs/installation.md), [migration](docs/migration.md), [architecture](docs/architecture.md), [profiles](docs/profiles.md), and [toolsets](docs/toolsets.md) for the operator-facing details.
 
 ## Toolsets and installed skills
 
-No toolset registration is required. Explorer follows Unity's `Packages/manifest.json` and `Packages/packages-lock.json` into embedded/local packages and `Library/PackageCache`. For Go it follows `go.work`, `go.mod`, replacements/vendor, and `GOMODCACHE`, using `go list -m -json all` only with `GOPROXY=off`. It reads each relevant resolved package/module `README.md` first and inspects the smallest necessary public API, source, and tests only when documentation is absent or insufficient.
+No toolset registration is required. Before source exploration in an unfamiliar codebase, package, or tool, Lightflow searches the relevant scope for Markdown documentation and reads only the one to three most relevant files. It prioritizes `README.md`, `USAGE.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and relevant usage, installation, integration, or API documents under `docs/`, then falls back to manifests, public APIs, and the smallest necessary source surface when documentation is absent or insufficient.
+
+Explorer follows Unity's `Packages/manifest.json` and `Packages/packages-lock.json` into embedded/local packages and `Library/PackageCache`. For Go it follows `go.work`, `go.mod`, replacements/vendor, and `GOMODCACHE`, using `go list -m -json all` only with `GOPROXY=off`.
 
 Lightflow uses a named or clearly necessary skill already available in the current host without chaining skills merely because they exist. Ponytail principles are implicit. Additional skills are not bundled; Lightflow falls back to repository guidance when they are absent.
 
 ## Platform adaptation
 
-Codex uses standalone `.codex/agents/*.toml` project agents and `AGENTS.md`. Claude Code discovers the shared skill and Markdown agents from the plugin root. Plan Mode is controlled by the host; Lightflow changes routing behavior when planning is active but does not enable the mode itself.
+Codex uses standalone `.codex/agents/*.toml` project agents. Claude Code discovers the shared skill and Markdown agents from the plugin root. On both hosts, the shared skill and specialists require an affirmative Lightflow invocation. Plan Mode is controlled by the host; Lightflow changes routing behavior when planning is active but does not enable the mode itself.
+
+Lightflow prefers readable paragraphs. It uses numbered lists for sequences or rankings and bullet lists for unordered alternatives or findings, but only when a list improves readability. Natural-language bullet items use `•`; code and structured formats keep their required syntax.
 
 ## Validation
 

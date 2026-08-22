@@ -44,9 +44,10 @@ function Test-TomlSubset([string]$Path) {
 
 $manifest = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\.codex-plugin\plugin.json") | ConvertFrom-Json
 Assert ($manifest.name -eq "lightflow") "Plugin name mismatch"
-Assert ($manifest.version -eq "0.4.0") "Codex plugin version mismatch"
+Assert ($manifest.version -eq "0.5.0") "Codex plugin version mismatch"
 Assert ($manifest.skills -eq "./skills/") "Plugin skills path mismatch"
 Assert ($manifest.PSObject.Properties.Name -notcontains "mcpServers") "Unused MCP configuration must not be present"
+Assert (@($manifest.interface.defaultPrompt | Where-Object { $_ -notmatch '^Use Lightflow\b' }).Count -eq 0) "Codex default prompts must affirmatively invoke Lightflow"
 
 $claudeManifest = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\.claude-plugin\plugin.json") | ConvertFrom-Json
 Assert ($claudeManifest.name -eq $manifest.name) "Claude plugin name mismatch"
@@ -67,9 +68,12 @@ Assert ((@($claudeAgentFiles.BaseName | Sort-Object) -join ",") -eq (@($roles | 
 foreach ($file in $claudeAgentFiles) {
     $content = Get-Content -Raw -LiteralPath $file.FullName
     Assert ($content -match "(?m)^name:\s*$($file.BaseName)\s*$") "Claude agent name mismatch: $($file.Name)"
-    Assert ($content -match '(?m)^description:\s*.+$') "Claude agent missing description: $($file.Name)"
+    Assert ($content -match '(?m)^description:\s*Lightflow-only\b') "Claude agent must be Lightflow-only: $($file.Name)"
     Assert ($content -match '(?m)^model:\s*(?:haiku|inherit)\s*$') "Claude agent model mismatch: $($file.Name)"
     Assert ($content -match '(?m)^effort:\s*(?:low|medium|high)\s*$') "Claude agent effort mismatch: $($file.Name)"
+    Assert ($content.Contains("active Lightflow workflow") -and $content.Contains("affirmatively invoked")) "Claude agent activation guard missing: $($file.Name)"
+    Assert ($content.Contains("Markdown") -and $content.Contains("one to three most relevant")) "Claude agent documentation-first policy missing: $($file.Name)"
+    Assert ($content.Contains("numbered lists") -and $content.Contains("bullet lists") -and $content.Contains("•") -and $content.Contains("complete, clear sentences")) "Claude agent response-style policy missing: $($file.Name)"
 }
 $claudeExplorer = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\agents\explorer.md")
 Assert ($claudeExplorer -match '(?m)^model:\s*haiku\s*$' -and $claudeExplorer -match '(?m)^effort:\s*low\s*$') "Claude Explorer must use Haiku low"
@@ -79,6 +83,11 @@ Assert ($claudeWorker -match '(?m)^tools:.*\bEdit\b.*\bWrite\b') "Claude Worker 
 $skillPath = Join-Path $root "plugins\lightflow\skills\lightflow\SKILL.md"
 $skillContent = Get-Content -Raw -LiteralPath $skillPath
 Assert ($skillContent -match '(?m)^name:\s*lightflow\s*$') "Bundled skill name mismatch"
+Assert ($skillContent.Contains("## Activation gate") -and $skillContent.Contains("affirmatively invokes Lightflow")) "Explicit Lightflow activation gate missing"
+foreach ($activationExample in @("use Lightflow", "run Lightflow", '$lightflow', "/lightflow:lightflow")) {
+    Assert ($skillContent.Contains($activationExample)) "Lightflow activation example missing: $activationExample"
+}
+Assert ($skillContent.Contains("Incidental mentions") -and $skillContent.Contains("negative instructions do not activate")) "Non-activation cases missing"
 Assert ($skillContent.Contains("Use one Explorer when")) "Cost-aware Explorer routing policy missing"
 Assert ($skillContent.Contains("MCP/app tools") -and $skillContent.Contains("only when the user explicitly requests")) "Operational-tool opt-in policy missing"
 Assert ($skillContent.Contains("lightflow:explorer") -and $skillContent.Contains("lightflow:worker")) "Claude agent host mapping missing"
@@ -88,16 +97,21 @@ Assert ($skillContent.Contains("Fidelity does not expand scope")) "Exact-copy bo
 Assert ($skillContent.Contains("bounded copy manifest")) "Exact-copy manifest policy missing"
 Assert ($skillContent.Contains("enumerate the applicable scenes and explicit exclusions")) "Unity scene coverage policy missing"
 Assert ($skillContent.Contains("Enter Play Mode") -and $skillContent.Contains("only when explicitly requested")) "Unity execution opt-in boundary missing"
+Assert ($skillContent.Contains("rg --files -g '*.md'") -and $skillContent.Contains("one to three most relevant files")) "Documentation-first exploration policy missing"
+foreach ($docName in @("README.md", "USAGE.md", "GETTING_STARTED.md", "QUICKSTART.md")) {
+    Assert ($skillContent.Contains($docName)) "Documentation priority missing: $docName"
+}
+Assert ($skillContent.Contains("## Communicate clearly") -and $skillContent.Contains("numbered lists") -and $skillContent.Contains("bullet lists") -and $skillContent.Contains("•") -and $skillContent.Contains("complete, plain-language sentences")) "Response-format policy missing"
 
 $toolsetPolicy = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\skills\lightflow\references\toolsets.md")
-foreach ($requiredText in @("go.work", "go.mod", "go list -m -json all", "GOPROXY=off", "GOMODCACHE", "package.json", "Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "README.md", "missing or insufficient")) {
+foreach ($requiredText in @("go.work", "go.mod", "go list -m -json all", "GOPROXY=off", "GOMODCACHE", "package.json", "Packages/manifest.json", "Packages/packages-lock.json", "Library/PackageCache", "README.md", "USAGE.md", "GETTING_STARTED.md", "QUICKSTART.md", "one to three most relevant files", "absent or insufficient")) {
     Assert ($toolsetPolicy.Contains($requiredText)) "Toolset discovery policy missing: $requiredText"
 }
 Assert (-not $toolsetPolicy.Contains(".codex/toolsets.json")) "Manual toolset registry must not be required"
 $authorityPolicy = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\skills\lightflow\references\authority.md")
 Assert ($authorityPolicy.Contains("Ponytail applies implicitly")) "Implicit Ponytail policy missing"
 $explorerTemplate = Get-Content -Raw -LiteralPath (Join-Path $root "scaffold\.codex\agents\explorer.toml")
-Assert ($explorerTemplate.Contains("README.md first")) "Explorer README-first policy missing"
+Assert ($explorerTemplate.Contains("Markdown documentation") -and $explorerTemplate.Contains("one to three most relevant files")) "Explorer documentation-first policy missing"
 Assert ($explorerTemplate.Contains("Library/PackageCache") -and $explorerTemplate.Contains("GOMODCACHE")) "Explorer native dependency-cache discovery missing"
 Assert ($explorerTemplate.Contains("line numbers") -and $explorerTemplate.Contains("inference separately")) "Explorer evidence contract missing"
 
@@ -117,9 +131,17 @@ foreach ($file in $agentFiles) {
     Test-TomlSubset $file.FullName
     $content = Get-Content -Raw -LiteralPath $file.FullName
     Assert ($content -match '(?m)^name\s*=') "Agent missing name: $($file.Name)"
-    Assert ($content -match '(?m)^description\s*=') "Agent missing description: $($file.Name)"
+    Assert ($content -match '(?m)^description\s*=\s*"Lightflow-only\b') "Codex agent must be Lightflow-only: $($file.Name)"
     Assert ($content -match '(?m)^developer_instructions\s*=') "Agent missing instructions: $($file.Name)"
+    Assert ($content.Contains("active Lightflow workflow") -and $content.Contains("affirmatively invoked")) "Codex agent activation guard missing: $($file.Name)"
+    Assert ($content.Contains("Markdown") -and $content.Contains("one to three most relevant")) "Codex agent documentation-first policy missing: $($file.Name)"
+    Assert ($content.Contains("numbered lists") -and $content.Contains("bullet lists") -and $content.Contains("•") -and $content.Contains("complete, clear sentences")) "Codex agent response-style policy missing: $($file.Name)"
 }
+
+$setupContent = Get-Content -Raw -LiteralPath (Join-Path $root "scripts\setup.ps1")
+Assert ($setupContent.Contains("Remove-LightflowAgentInstructions")) "Setup must remove obsolete Lightflow AGENTS.md blocks"
+Assert (-not $setupContent.Contains("Merge-AgentInstructions")) "Setup must not inject Lightflow AGENTS.md instructions"
+Assert (-not (Test-Path -LiteralPath (Join-Path $root "scaffold\AGENTS.md"))) "Obsolete scaffold AGENTS.md must be removed"
 
 $availableModelIds = $null
 if (Get-Command codex -ErrorAction SilentlyContinue) {
@@ -252,7 +274,7 @@ try {
     & (Join-Path $root "scripts\setup.ps1") -TargetRepository $tempRoot -Profile balanced | Out-Null
     $installedAgents = Get-Content -Raw -LiteralPath (Join-Path $tempRoot "AGENTS.md")
     Assert ($installedAgents.Contains("Keep this instruction.")) "Setup overwrote existing AGENTS.md"
-    Assert ($installedAgents.Contains("<!-- BEGIN LIGHTFLOW WORKFLOW -->") -and -not $installedAgents.Contains("NATURAL DEVELOPMENT WORKFLOW")) "Setup did not migrate the legacy managed block"
+    Assert (-not $installedAgents.Contains("LIGHTFLOW WORKFLOW") -and -not $installedAgents.Contains("NATURAL DEVELOPMENT WORKFLOW")) "Setup did not remove the legacy managed block"
     Assert ((Get-Content -Raw -LiteralPath (Join-Path $tempRoot ".codex\config.toml")).Contains('approval_policy = "on-request"')) "Setup removed existing config"
     Assert (@(Get-ChildItem -LiteralPath (Join-Path $tempRoot ".codex\agents") -Filter "*.toml").Count -eq 4) "Setup did not generate four specialists"
     Assert (-not (Test-Path -LiteralPath (Join-Path $tempRoot ".codex\agents\orchestrator.toml"))) "Setup did not remove the legacy custom Orchestrator"
@@ -275,6 +297,58 @@ try {
 
     Test-TomlSubset (Join-Path $tempRoot ".codex\config.toml")
     foreach ($role in $roles) { Test-TomlSubset (Join-Path $tempRoot ".codex\agents\$role.toml") }
+
+    $agentCases = @(
+        @{
+            Name = "current"
+            Content = "# Existing project`r`n`r`nKeep current instructions.`r`n`r`n<!-- BEGIN LIGHTFLOW WORKFLOW -->`r`nCurrent block.`r`n<!-- END LIGHTFLOW WORKFLOW -->`r`n"
+            ExistsAfter = $true
+            PreservedText = "Keep current instructions."
+            BackupCount = 1
+        },
+        @{
+            Name = "generated-only"
+            Content = "# Project agent instructions`r`n`r`n<!-- BEGIN LIGHTFLOW WORKFLOW -->`r`nGenerated block.`r`n<!-- END LIGHTFLOW WORKFLOW -->`r`n"
+            ExistsAfter = $false
+            PreservedText = $null
+            BackupCount = 1
+        },
+        @{
+            Name = "absent"
+            Content = $null
+            ExistsAfter = $false
+            PreservedText = $null
+            BackupCount = 0
+        },
+        @{
+            Name = "unmanaged"
+            Content = "# Project-owned instructions`r`n`r`nKeep this file unchanged.`r`n"
+            ExistsAfter = $true
+            PreservedText = "Keep this file unchanged."
+            BackupCount = 0
+        }
+    )
+
+    foreach ($case in $agentCases) {
+        $caseRoot = Join-Path $tempRoot $case.Name
+        New-Item -ItemType Directory -Path $caseRoot | Out-Null
+        if ($null -ne $case.Content) {
+            [System.IO.File]::WriteAllText((Join-Path $caseRoot "AGENTS.md"), $case.Content)
+        }
+
+        & (Join-Path $root "scripts\setup.ps1") -TargetRepository $caseRoot -Profile balanced | Out-Null
+        $caseAgentsPath = Join-Path $caseRoot "AGENTS.md"
+        Assert ((Test-Path -LiteralPath $caseAgentsPath -PathType Leaf) -eq $case.ExistsAfter) "Unexpected AGENTS.md result for setup case: $($case.Name)"
+        if ($case.ExistsAfter) {
+            $caseAgents = Get-Content -Raw -LiteralPath $caseAgentsPath
+            Assert ($caseAgents.Contains($case.PreservedText)) "Setup did not preserve project instructions for case: $($case.Name)"
+            Assert (-not $caseAgents.Contains("LIGHTFLOW WORKFLOW") -and -not $caseAgents.Contains("NATURAL DEVELOPMENT WORKFLOW")) "Setup left a managed block for case: $($case.Name)"
+            if ($case.Name -eq "unmanaged") {
+                Assert ($caseAgents -eq $case.Content) "Setup changed an unmanaged AGENTS.md file"
+            }
+        }
+        Assert (@(Get-ChildItem -LiteralPath $caseRoot -Filter "AGENTS.md.lightflow-backup-*").Count -eq $case.BackupCount) "Unexpected AGENTS.md backup count for setup case: $($case.Name)"
+    }
 } finally {
     $resolvedTemp = [System.IO.Path]::GetFullPath($tempRoot)
     if ($resolvedTemp.StartsWith($tempBase, [System.StringComparison]::OrdinalIgnoreCase) -and

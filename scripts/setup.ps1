@@ -23,7 +23,7 @@ if (-not (Test-Path -LiteralPath $TargetRepository -PathType Container)) {
 }
 
 $targetRoot = (Resolve-Path -LiteralPath $TargetRepository).ProviderPath
-$profileData = Get-Content -Raw -LiteralPath $profilePath | ConvertFrom-Json
+$profileData = Get-Content -Raw -Encoding UTF8 -LiteralPath $profilePath | ConvertFrom-Json
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 
 function Write-Text([string]$Path, [string]$Content) {
@@ -40,7 +40,7 @@ function Backup-File([string]$Path) {
 }
 
 function Set-TopLevelTomlValue([string]$Path, [string]$Key, [string]$Value) {
-    $lines = [System.Collections.Generic.List[string]](Get-Content -LiteralPath $Path)
+    $lines = [System.Collections.Generic.List[string]](Get-Content -Encoding UTF8 -LiteralPath $Path)
     $firstTable = $lines.Count
     for ($i = 0; $i -lt $lines.Count; $i++) {
         if ($lines[$i] -match '^\s*\[') { $firstTable = $i; break }
@@ -58,7 +58,7 @@ function Set-TopLevelTomlValue([string]$Path, [string]$Key, [string]$Value) {
 }
 
 function Set-TomlTableValue([string]$Path, [string]$Table, [string]$Key, [string]$Value) {
-    $lines = [System.Collections.Generic.List[string]](Get-Content -LiteralPath $Path)
+    $lines = [System.Collections.Generic.List[string]](Get-Content -Encoding UTF8 -LiteralPath $Path)
     $header = "[$Table]"
     $start = -1
     for ($i = 0; $i -lt $lines.Count; $i++) {
@@ -88,39 +88,29 @@ function Set-TomlTableValue([string]$Path, [string]$Table, [string]$Key, [string
     Write-Text $Path (($lines -join "`r`n") + "`r`n")
 }
 
-function Merge-AgentInstructions([string]$Destination) {
-    $source = Get-Content -Raw -LiteralPath (Join-Path $script:scaffoldRoot "AGENTS.md")
-    $begin = "<!-- BEGIN LIGHTFLOW WORKFLOW -->"
-    $end = "<!-- END LIGHTFLOW WORKFLOW -->"
-    $legacyBegin = "<!-- BEGIN NATURAL DEVELOPMENT WORKFLOW -->"
-    $legacyEnd = "<!-- END NATURAL DEVELOPMENT WORKFLOW -->"
-    $sourceStart = $source.IndexOf($begin)
-    $sourceEnd = $source.IndexOf($end) + $end.Length
-    $managed = $source.Substring($sourceStart, $sourceEnd - $sourceStart)
+function Remove-LightflowAgentInstructions([string]$Destination) {
+    if (-not (Test-Path -LiteralPath $Destination -PathType Leaf)) { return }
 
-    if (-not (Test-Path -LiteralPath $Destination -PathType Leaf)) {
-        Copy-Item -LiteralPath (Join-Path $script:scaffoldRoot "AGENTS.md") -Destination $Destination
+    $current = Get-Content -Raw -Encoding UTF8 -LiteralPath $Destination
+    $updated = $current
+    $patterns = @(
+        '(?ms)^[ \t]*<!-- BEGIN LIGHTFLOW WORKFLOW -->.*?^[ \t]*<!-- END LIGHTFLOW WORKFLOW -->[ \t]*(?:\r?\n)?',
+        '(?ms)^[ \t]*<!-- BEGIN NATURAL DEVELOPMENT WORKFLOW -->.*?^[ \t]*<!-- END NATURAL DEVELOPMENT WORKFLOW -->[ \t]*(?:\r?\n)?'
+    )
+    foreach ($pattern in $patterns) {
+        $updated = [regex]::Replace($updated, $pattern, "")
+    }
+    if ($updated -eq $current) { return }
+
+    Backup-File $Destination | Out-Null
+    $remaining = $updated.Trim()
+    if ($remaining -eq "" -or $remaining -eq "# Project agent instructions") {
+        Remove-Item -LiteralPath $Destination -Force
         return
     }
 
-    Backup-File $Destination | Out-Null
-    $current = Get-Content -Raw -LiteralPath $Destination
-    $currentStart = $current.IndexOf($begin)
-    $currentEndMarker = $current.IndexOf($end)
-    if ($currentStart -lt 0 -or $currentEndMarker -lt $currentStart) {
-        $currentStart = $current.IndexOf($legacyBegin)
-        $currentEndMarker = $current.IndexOf($legacyEnd)
-        $currentEndToken = $legacyEnd
-    } else {
-        $currentEndToken = $end
-    }
-    if ($currentStart -ge 0 -and $currentEndMarker -ge $currentStart) {
-        $currentEnd = $currentEndMarker + $currentEndToken.Length
-        $updated = $current.Substring(0, $currentStart) + $managed + $current.Substring($currentEnd)
-    } else {
-        $updated = $current.TrimEnd() + "`r`n`r`n" + $managed + "`r`n"
-    }
-    Write-Text $Destination $updated
+    $updated = [regex]::Replace($updated, '(\r?\n){3,}', "`r`n`r`n")
+    Write-Text $Destination ($updated.TrimEnd() + "`r`n")
 }
 
 $codexDir = Join-Path $targetRoot ".codex"
@@ -129,7 +119,7 @@ $configPath = Join-Path $codexDir "config.toml"
 New-Item -ItemType Directory -Force -Path $agentsDir | Out-Null
 
 if (-not $ProfileOnly) {
-    Merge-AgentInstructions (Join-Path $targetRoot "AGENTS.md")
+    Remove-LightflowAgentInstructions (Join-Path $targetRoot "AGENTS.md")
 
     if (Test-Path -LiteralPath $configPath -PathType Leaf) {
         Backup-File $configPath | Out-Null
@@ -174,7 +164,7 @@ foreach ($role in $roles) {
 
 $expected = @($configPath) + @($roles | ForEach-Object { Join-Path $agentsDir "$_.toml" })
 foreach ($path in $expected) {
-    $content = Get-Content -Raw -LiteralPath $path
+    $content = Get-Content -Raw -Encoding UTF8 -LiteralPath $path
     if ($content -notmatch '(?m)^model\s*=\s*"gpt-5\.6-(?:sol|terra|luna)"\s*$' -or
         $content -notmatch '(?m)^model_reasoning_effort\s*=\s*"(?:low|medium|high|xhigh)"\s*$') {
         throw "Generated model configuration failed validation: $path"

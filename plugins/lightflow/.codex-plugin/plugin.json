@@ -1,7 +1,7 @@
 {
   "name": "lightflow",
-  "version": "0.4.0",
-  "description": "Route natural software-development requests through the smallest reliable Codex workflow.",
+  "version": "0.5.0",
+  "description": "Run an explicitly requested, cost-aware software-development workflow.",
   "author": {
     "name": "Lightflow contributors"
   },
@@ -26,9 +26,9 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Implement this feature.",
-      "Fix this bug.",
-      "Plan this system first."
+      "Use Lightflow to implement this feature.",
+      "Use Lightflow to fix this bug.",
+      "Use Lightflow to plan this system first."
     ]
   }
 }

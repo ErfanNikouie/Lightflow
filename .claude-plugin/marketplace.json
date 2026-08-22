@@ -7,7 +7,7 @@
     {
       "name": "lightflow",
       "source": "./plugins/lightflow",
-      "description": "Cost-aware software-development orchestration with focused repository exploration"
+      "description": "Explicitly requested, cost-aware software-development orchestration with focused repository exploration"
     }
   ]
 }

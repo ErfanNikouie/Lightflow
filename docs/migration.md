@@ -22,7 +22,7 @@ Do not use `--profile-only` for the first migration run:
 scripts\setup.bat C:\path\to\project refined-balanced
 ```
 
-The full run updates the managed `AGENTS.md` block and model IDs, installs Explorer, Architect, Worker, and Reviewer, and backs up then removes the obsolete `.codex/agents/orchestrator.toml`. The primary Codex agent remains Orchestrator. Existing changed files receive timestamped `.lightflow-backup-*` copies.
+The full run removes current or legacy Lightflow-managed `AGENTS.md` blocks, updates model IDs, installs the gated Explorer, Architect, Worker, and Reviewer, and backs up then removes the obsolete `.codex/agents/orchestrator.toml`. Unrelated `AGENTS.md` instructions remain intact. A generated-only `AGENTS.md` is backed up and deleted. The primary Codex agent remains Orchestrator. Existing changed files receive timestamped `.lightflow-backup-*` copies.
 
 ## Local agent configuration
 
@@ -34,13 +34,13 @@ Recommended when teammates want independent agent/model tuning:
 *.lightflow-backup-*
 ```
 
-Each teammate installs Lightflow and runs the full setup locally. Commit the shared `AGENTS.md`, but not the generated agents, config, or backup files. Everyone should use the same Lightflow revision when consistent routing matters.
+Each teammate installs Lightflow and runs the full setup locally. Commit project-owned `AGENTS.md` instructions when applicable, but do not commit generated agents, config, or backup files. Everyone should use the same Lightflow revision when consistent routing matters.
 
 ## Git-tracked agent configuration
 
 If the project intentionally versions Codex configuration, run the full setup and commit:
 
-- The updated `AGENTS.md` and `.codex/config.toml`.
+- The cleaned project-owned `AGENTS.md`, when it still exists, and `.codex/config.toml`.
 - Explorer, Architect, Worker, and Reviewer TOML files.
 - The deletion of `.codex/agents/orchestrator.toml`.
 

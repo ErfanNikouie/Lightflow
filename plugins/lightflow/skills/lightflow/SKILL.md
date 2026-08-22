@@ -1,20 +1,26 @@
 ---
 name: lightflow
-description: Route software features, bug fixes, refactors, integrations, architecture work, and trivial edits through a cost-aware development workflow for Codex or Claude Code. Use in configured repositories when users expect implementation or planning without naming agents; do not use for non-software knowledge work.
+description: Run the Lightflow software-development workflow only when the user affirmatively invokes it with wording such as "use Lightflow," "run Lightflow," "$lightflow," or "/lightflow:lightflow." Incidental mentions, criticism, questions about Lightflow, and negative instructions do not activate it.
 ---
 
 # Lightflow
 
 Act as a cost-aware orchestrator and primary implementer. Keep final reasoning and implementation in the primary context while offloading real repository exploration to the cheaper read-only Explorer.
 
+## Activation gate
+
+Use this workflow only when the current user request affirmatively invokes Lightflow. Requests such as “use Lightflow,” “run Lightflow,” `$lightflow`, and `/lightflow:lightflow` qualify. Merely mentioning, discussing, criticizing, questioning, configuring, or asking not to use Lightflow does not qualify. If the request does not qualify, stop applying this skill and handle the request normally.
+
 ## Start
 
-1. Read applicable repository instructions and accepted architecture records.
-2. Classify the request by work type, architecture completeness, risk, and whether the host is in Plan Mode. Read [routing](references/routing.md) for the classifications and recipes.
-3. Apply the [authority hierarchy](references/authority.md). User-supplied architecture is a constraint, not an invitation to redesign.
-4. When the requested capability may already exist in a shared package or module, inspect the project's native dependency graph and resolved local dependency cache; then follow [dependency/toolset policy](references/toolsets.md).
-5. Use an installed skill when the user names it or it is clearly necessary for the task. Do not chain skills or invoke operational tools merely because they are available. Project agents inherit the parent session's skills, but delegation is governed by the opt-in rules below.
-6. When the user names another project as the implementation source, determine reference intent before editing:
+1. Confirm that the activation gate is satisfied.
+2. Determine the relevant repository, package, or tool scope. Before reading implementation source in an unfamiliar scope, search that scope for Markdown documentation, preferably with `rg --files -g '*.md'`. Read only the one to three most relevant files, prioritizing the nearest `README.md`, `USAGE.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and relevant usage, installation, integration, or API documents under `docs/`. If those documents are absent or insufficient, continue with manifests, public APIs, and the smallest necessary source surface. State which documentation informed the work or that no adequate documentation was found.
+3. Read applicable repository instructions and accepted architecture records.
+4. Classify the request by work type, architecture completeness, risk, and whether the host is in Plan Mode. Read [routing](references/routing.md) for the classifications and recipes.
+5. Apply the [authority hierarchy](references/authority.md). User-supplied architecture is a constraint, not an invitation to redesign.
+6. When the requested capability may already exist in a shared package or module, inspect the project's native dependency graph and resolved local dependency cache; then follow [dependency/toolset policy](references/toolsets.md).
+7. Use an installed skill when the user names it or it is clearly necessary for the task. Do not chain skills or invoke operational tools merely because they are available. Project agents inherit the parent session's skills, but delegation is governed by the opt-in rules below.
+8. When the user names another project as the implementation source, determine reference intent before editing:
    - Exact replication: phrases such as “copy and paste,” “identical,” “unchanged,” or “use the same implementation” lock the named system's relevant source structure, files, interfaces, names, behavior, assets, settings, serialized wiring, and pipeline order. Fidelity does not expand scope. Copy only the named roots and their strictly required dependency closure; never copy a whole project, unrelated sibling systems, scenes, or assets unless the user explicitly requests that breadth. Reuse dependencies already present in the target. Copy the bounded source artifacts when possible; do not rewrite, minimize, redesign, or adapt them. Only target-identity changes strictly required to compile or resolve references are allowed, and each deviation must be reported.
    - Template replication: phrases such as “use project A's setup/base” lock the smallest complete reusable cohesive slice: entry points, helpers, configuration/assets/prefabs, extensibility pipelines, and relevant folder conventions. Preserve its architecture and extension points while excluding source-product-specific behavior.
    - Adaptation: change the source design for the target only when the user explicitly requests adaptation or an evidenced incompatibility makes exact/template replication impossible. Preserve public contracts unless changing them is explicitly authorized.
@@ -33,6 +39,10 @@ On Codex, use the project agents `explorer`, `architect`, `worker`, and `reviewe
 - Do not parallelize merely for speed. Extra contexts consume more quota and can reduce coherence.
 
 For low/normal work, use at most one Explorer and keep the primary agent as the writer. Keep handoffs to findings, constraints, decisions, changed files, validation, and actionable review results. Reuse prior findings instead of repeating investigation. Never use parallel writers against the same state.
+
+## Communicate clearly
+
+Prefer connected paragraphs for explanations. Use numbered lists for sequences, procedures, rankings, or items that need numbered references. Use bullet lists for unordered alternatives, findings, or related items. Neither list style is the default; use a list only when it improves readability. In generated natural-language bullet lists, prefix items with the literal `•` character instead of a Markdown hyphen. Write complete, plain-language sentences rather than fragments, compressed labels, or unnecessary jargon. Preserve required syntax in code, commands, diffs, JSON, YAML, TOML, and source Markdown.
 
 ## Implement and finish
 

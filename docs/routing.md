@@ -1,6 +1,6 @@
 # Routing
 
-Users state the task, not the machinery. The primary Orchestrator is the decision-maker and writer. One cheap read-only Explorer handles non-trivial repository discovery so the primary model spends its context on reasoning and implementation.
+Users explicitly invoke Lightflow but do not need to name its internal agents. Incidental mentions, criticism, questions, and negative instructions do not activate the workflow. Once active, the primary Orchestrator is the decision-maker and writer. One cheap read-only Explorer handles non-trivial repository discovery so the primary model spends its context on reasoning and implementation.
 
 The canonical rules are shipped with the plugin in `plugins/lightflow/skills/lightflow/references/routing.md`. In practical terms:
 
@@ -15,5 +15,7 @@ Normal work uses at most one Explorer. Multiple specialists or parallelism requi
 Cross-project work also classifies reference intent. Explicit copy/identical/unchanged language requires exact replication with source-parity validation and no cleanup, minimization, interface changes, or behavioral adaptation. Exactness never widens scope: copy only the named system and strictly required dependency closure, use a bounded copy manifest, and reject unrelated changes. Requests to check other systems are read-only. “Use project A's setup/base” preserves the complete reusable source structure and extension points while excluding only product-specific behavior. Adaptation is allowed only when requested or forced by an evidenced incompatibility.
 
 Execution is opt-in. Tests, builds, compilers, linters, formatters, MCP/app tools, browser/editor/runtime automation, Play Mode, and polling/waiting run only when explicitly requested. When live Unity validation is requested, completion is state-based: wait until importing/compilation is idle, then inspect the final-cycle Console.
+
+Before source exploration in an unfamiliar scope, Lightflow reads the one to three most relevant Markdown usage or architecture documents. Explanations use paragraphs by default, numbered lists for sequences or rankings, and bullet lists for unordered findings or alternatives when a list is clearer. Natural-language bullet items use `•`, and all prose uses complete, readable sentences.
 
 The scenario matrix in `evals/routing-scenarios.json` covers the required feature, bugfix, refactor, integration, planning, dependency/toolset, Unity, Go/Nakama, and critical-work routes. `evals/validate.ps1` checks those contracts without a model; `evals/run-behavioral.ps1` runs the prompts against Codex and includes a real write-and-verify smoke task.

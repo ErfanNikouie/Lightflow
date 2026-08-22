@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "lightflow",
   "displayName": "Lightflow",
-  "version": "0.4.0",
-  "description": "Route software-development requests through a cost-aware workflow with focused repository exploration.",
+  "version": "0.5.0",
+  "description": "Run an explicitly requested, cost-aware software-development workflow with focused repository exploration.",
   "author": {
     "name": "Lightflow contributors"
   },

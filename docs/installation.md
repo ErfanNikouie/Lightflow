@@ -44,7 +44,7 @@ Run from this repository:
 scripts\setup.bat C:\path\to\project refined-balanced
 ```
 
-The script resolves the target path, merges a marked block into `AGENTS.md`, preserves unrelated `.codex/config.toml` values, writes the four managed specialist files, removes the obsolete custom Orchestrator after backing it up, injects the chosen profile, validates expected fields, and prints a summary. Existing files that the install/update path changes receive timestamped `.lightflow-backup-*` copies.
+The script resolves the target path, removes obsolete Lightflow-managed blocks from `AGENTS.md`, preserves unrelated project instructions and `.codex/config.toml` values, writes the four gated specialist files, removes the obsolete custom Orchestrator after backing it up, injects the chosen profile, validates expected fields, and prints a summary. Existing files that the install/update path changes receive timestamped `.lightflow-backup-*` copies. If `AGENTS.md` contains only Lightflow's generated heading and managed block, setup backs it up and deletes it; if no managed block exists, setup leaves the file unchanged.
 
 Change only model fields later:
 
@@ -52,7 +52,7 @@ Change only model fields later:
 scripts\setup.bat C:\path\to\project refined-balanced --profile-only
 ```
 
-The profile-only path requires an existing scaffold and does not reinstall instructions or role behavior.
+The profile-only path requires an existing scaffold and does not change `AGENTS.md`, reinstall role behavior, or create unrelated backups.
 
 The Windows desktop app uses PowerShell natively and shares `%USERPROFILE%\.codex` with native Codex. See [official Windows behavior](https://learn.chatgpt.com/docs/windows/windows-app) when mixing native Windows and WSL repositories.
 
