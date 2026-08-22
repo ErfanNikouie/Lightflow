@@ -1,10 +1,12 @@
 # Lightflow
 
-Lightflow is a small, team-shareable Codex plugin and repository scaffold for natural software-development requests. Install the plugin, run one setup command in a project, and ask for work normally; the workflow chooses the least expensive route that still protects correctness and architectural intent.
+Lightflow is a small, team-shareable Codex and Claude Code plugin for natural software-development requests. It chooses the least expensive route that still protects correctness and architectural intent.
 
 ## Quick start
 
-1. Add this repository as a marketplace:
+### Codex
+
+1. Add this repository as a marketplace and install Lightflow:
 
    ```powershell
    codex plugin marketplace add ErfanNikouie/Lightflow
@@ -25,20 +27,30 @@ Lightflow is a small, team-shareable Codex plugin and repository scaffold for na
    scripts\setup.bat C:\path\to\project refined-balanced --profile-only
    ```
 
-3. Open the project in ChatGPT/Codex and speak naturally:
+3. Open the project in ChatGPT/Codex and speak naturally.
 
-   - “Implement player reconnect.”
-   - “Refactor this service. Keep these three interfaces, but decide the remaining boundaries yourself.”
-   - “Port the leaderboard implementation from repository A, but reuse our shared Go economy module.”
-   - “Plan this first. I already decided how persistence works.”
+### Claude Code
 
-The workflow does not require users to name agents for ordinary work. Operational tools and execution validation are opt-in: ask for tests, builds, Play Mode, Console checks, browser/editor automation, or another live operation when you want it run.
+Add the same repository as a Claude marketplace and install Lightflow:
+
+```powershell
+claude plugin marketplace add ErfanNikouie/Lightflow
+claude plugin install lightflow@lightflow
+```
+
+The Claude plugin bundles the shared skill and four native agents, so no project scaffold is required. Speak naturally in the target repository:
+
+- “Implement player reconnect.”
+- “Refactor this service. Keep these three interfaces, but decide the remaining boundaries yourself.”
+- “Port the leaderboard implementation from repository A, but reuse our shared Go economy module.”
+- “Plan this first. I already decided how persistence works.”
+
+The workflow does not require users to name agents for ordinary work. Operational tools and execution validation are opt-in on both hosts: ask for tests, builds, Play Mode, Console checks, browser/editor automation, or another live operation when you want it run.
 
 ## What gets installed
 
-- A managed section in the target `AGENTS.md` (existing instructions are preserved and backed up before the first merge).
-- `.codex/config.toml` model and multi-agent defaults, merged without removing unrelated settings.
-- Four project specialists in `.codex/agents/`: explorer, architect, worker, and reviewer. The primary Codex agent is Orchestrator.
+- Codex: a managed `AGENTS.md` section, `.codex/config.toml` model settings, and four project specialists in `.codex/agents/`.
+- Claude Code: the shared Lightflow skill plus four plugin agents; Explorer uses Haiku at low effort while the opt-in roles inherit the session model.
 
 See [installation](docs/installation.md), [migration](docs/migration.md), [architecture](docs/architecture.md), [profiles](docs/profiles.md), and [toolsets](docs/toolsets.md) for the operator-facing details.
 
@@ -46,11 +58,11 @@ See [installation](docs/installation.md), [migration](docs/migration.md), [archi
 
 No toolset registration is required. Explorer follows Unity's `Packages/manifest.json` and `Packages/packages-lock.json` into embedded/local packages and `Library/PackageCache`. For Go it follows `go.work`, `go.mod`, replacements/vendor, and `GOMODCACHE`, using `go list -m -json all` only with `GOPROXY=off`. It reads each relevant resolved package/module `README.md` first and inspects the smallest necessary public API, source, and tests only when documentation is absent or insufficient.
 
-Lightflow uses a named or clearly necessary skill already available in the current Codex installation without chaining skills merely because they exist. Its custom agents inherit the parent skill configuration. Ponytail principles are implicit. These skills are not bundled: teammates get the same integration when they install/enable the same skills, while Lightflow falls back to repository guidance when they do not.
+Lightflow uses a named or clearly necessary skill already available in the current host without chaining skills merely because they exist. Ponytail principles are implicit. Additional skills are not bundled; Lightflow falls back to repository guidance when they are absent.
 
 ## Platform adaptation
 
-The scaffold follows current OpenAI documentation: project custom agents are standalone `.codex/agents/*.toml` layers, repo instructions live in `AGENTS.md`, and the Windows desktop app runs natively with PowerShell. Plan Mode is controlled by the host UI/runtime; Lightflow changes routing behavior when planning is active but does not attempt to enable the mode itself.
+Codex uses standalone `.codex/agents/*.toml` project agents and `AGENTS.md`. Claude Code discovers the shared skill and Markdown agents from the plugin root. Plan Mode is controlled by the host; Lightflow changes routing behavior when planning is active but does not enable the mode itself.
 
 ## Validation
 
@@ -60,7 +72,7 @@ From PowerShell:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\evals\validate.ps1
 ```
 
-The fast validator checks JSON/TOML syntax, manifest/role invariants, setup and profile-only behavior, native dependency discovery, scenario contracts, and the shared-source approval boundary. It does not call a model.
+The fast validator checks Codex and Claude manifests, agent/profile invariants, setup behavior, native dependency discovery, scenario contracts, and the shared-source approval boundary. It does not call a model.
 
 Run the opt-in live evaluator when changing routing or agent behavior. It requires Codex authentication and uses model quota:
 
@@ -79,6 +91,9 @@ Use `-ScenarioId trivial-rename,failing-rpc` for a smaller run or `-SkipExecutio
 - [Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
 - [Windows desktop behavior](https://learn.chatgpt.com/docs/windows/windows-app)
 - [ChatGPT Work execution boundaries](https://learn.chatgpt.com/docs/enterprise/chatgpt-work-overview)
+- [Create Claude Code plugins](https://code.claude.com/docs/en/plugins)
+- [Claude Code plugin reference](https://code.claude.com/docs/en/plugins-reference)
+- [Claude Code plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
 
 ## License
 

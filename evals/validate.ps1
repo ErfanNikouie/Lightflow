@@ -44,13 +44,44 @@ function Test-TomlSubset([string]$Path) {
 
 $manifest = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\.codex-plugin\plugin.json") | ConvertFrom-Json
 Assert ($manifest.name -eq "lightflow") "Plugin name mismatch"
+Assert ($manifest.version -eq "0.4.0") "Codex plugin version mismatch"
 Assert ($manifest.skills -eq "./skills/") "Plugin skills path mismatch"
 Assert ($manifest.PSObject.Properties.Name -notcontains "mcpServers") "Unused MCP configuration must not be present"
+
+$claudeManifest = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\.claude-plugin\plugin.json") | ConvertFrom-Json
+Assert ($claudeManifest.name -eq $manifest.name) "Claude plugin name mismatch"
+Assert ($claudeManifest.version -eq $manifest.version) "Codex and Claude plugin versions differ"
+Assert ($claudeManifest.skills -eq "./skills/") "Claude plugin skills path mismatch"
+Assert ($claudeManifest.agents -eq "./agents/") "Claude plugin agents path mismatch"
+Assert ($claudeManifest.PSObject.Properties.Name -notcontains "mcpServers") "Claude plugin must not configure MCP"
+
+$claudeMarketplace = Get-Content -Raw -LiteralPath (Join-Path $root ".claude-plugin\marketplace.json") | ConvertFrom-Json
+Assert ($claudeMarketplace.name -eq "lightflow") "Claude marketplace name mismatch"
+Assert ($claudeMarketplace.plugins.Count -eq 1) "Claude marketplace must expose exactly one plugin"
+Assert ($claudeMarketplace.plugins[0].name -eq "lightflow") "Claude marketplace plugin name mismatch"
+Assert ($claudeMarketplace.plugins[0].source -eq "./plugins/lightflow") "Claude marketplace source mismatch"
+
+$claudeAgentFiles = @(Get-ChildItem -LiteralPath (Join-Path $root "plugins\lightflow\agents") -Filter "*.md")
+Assert ($claudeAgentFiles.Count -eq 4) "Claude plugin must contain exactly four agents"
+Assert ((@($claudeAgentFiles.BaseName | Sort-Object) -join ",") -eq (@($roles | Sort-Object) -join ",")) "Claude agent role set mismatch"
+foreach ($file in $claudeAgentFiles) {
+    $content = Get-Content -Raw -LiteralPath $file.FullName
+    Assert ($content -match "(?m)^name:\s*$($file.BaseName)\s*$") "Claude agent name mismatch: $($file.Name)"
+    Assert ($content -match '(?m)^description:\s*.+$') "Claude agent missing description: $($file.Name)"
+    Assert ($content -match '(?m)^model:\s*(?:haiku|inherit)\s*$') "Claude agent model mismatch: $($file.Name)"
+    Assert ($content -match '(?m)^effort:\s*(?:low|medium|high)\s*$') "Claude agent effort mismatch: $($file.Name)"
+}
+$claudeExplorer = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\agents\explorer.md")
+Assert ($claudeExplorer -match '(?m)^model:\s*haiku\s*$' -and $claudeExplorer -match '(?m)^effort:\s*low\s*$') "Claude Explorer must use Haiku low"
+Assert ($claudeExplorer -match '(?m)^disallowedTools:\s*Write, Edit\s*$') "Claude Explorer must deny write tools"
+$claudeWorker = Get-Content -Raw -LiteralPath (Join-Path $root "plugins\lightflow\agents\worker.md")
+Assert ($claudeWorker -match '(?m)^tools:.*\bEdit\b.*\bWrite\b') "Claude Worker must expose edit tools"
 $skillPath = Join-Path $root "plugins\lightflow\skills\lightflow\SKILL.md"
 $skillContent = Get-Content -Raw -LiteralPath $skillPath
 Assert ($skillContent -match '(?m)^name:\s*lightflow\s*$') "Bundled skill name mismatch"
 Assert ($skillContent.Contains("Use one Explorer when")) "Cost-aware Explorer routing policy missing"
 Assert ($skillContent.Contains("MCP/app tools") -and $skillContent.Contains("only when the user explicitly requests")) "Operational-tool opt-in policy missing"
+Assert ($skillContent.Contains("lightflow:explorer") -and $skillContent.Contains("lightflow:worker")) "Claude agent host mapping missing"
 Assert ($skillContent.Contains("Exact replication") -and $skillContent.Contains("Template replication") -and $skillContent.Contains("Adaptation")) "Reference-intent routing policy missing"
 Assert ($skillContent.Contains("do not rewrite, minimize, redesign, or adapt")) "Exact-copy fidelity boundary missing"
 Assert ($skillContent.Contains("Fidelity does not expand scope")) "Exact-copy bounded-scope policy missing"
@@ -252,4 +283,4 @@ try {
     }
 }
 
-Write-Host "Lightflow structural validation passed: plugin, marketplace, four specialists, profiles, setup, TOML subset, and $($scenarios.Count) scenario contracts."
+Write-Host "Lightflow structural validation passed: Codex and Claude plugins, marketplaces, specialists, profiles, setup, TOML subset, and $($scenarios.Count) scenario contracts."

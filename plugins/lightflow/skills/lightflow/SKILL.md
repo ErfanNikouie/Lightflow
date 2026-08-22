@@ -1,6 +1,6 @@
 ---
 name: lightflow
-description: Route software features, bug fixes, refactors, integrations, architecture work, and trivial edits through a risk-aware Codex workflow. Use in configured repositories when users speak naturally and expect implementation or planning without naming agents; do not use for non-software knowledge work.
+description: Route software features, bug fixes, refactors, integrations, architecture work, and trivial edits through a cost-aware development workflow for Codex or Claude Code. Use in configured repositories when users expect implementation or planning without naming agents; do not use for non-software knowledge work.
 ---
 
 # Lightflow
@@ -23,6 +23,8 @@ Act as a cost-aware orchestrator and primary implementer. Keep final reasoning a
 ## Keep the primary context focused
 
 The primary agent is Orchestrator and the default writer. The configured custom specialists are exactly Explorer, Architect, Worker, and Reviewer; never spawn a second Orchestrator.
+
+On Codex, use the project agents `explorer`, `architect`, `worker`, and `reviewer`. On Claude Code, use the plugin agents `lightflow:explorer`, `lightflow:architect`, `lightflow:worker`, and `lightflow:reviewer`.
 
 - Execute trivial work and already-localized changes directly.
 - Use one Explorer when the task requires discovering where behavior lives, tracing callers or dependencies across files, mapping an unfamiliar subsystem, or comparing source and target repositories. Give it a bounded read-only question and require path/symbol evidence for material claims; do not make the primary agent repeat the same exploration.

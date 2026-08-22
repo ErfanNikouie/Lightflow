@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lightflow",
+  "displayName": "Lightflow",
+  "version": "0.4.0",
+  "description": "Route software-development requests through a cost-aware workflow with focused repository exploration.",
+  "author": {
+    "name": "Lightflow contributors"
+  },
+  "homepage": "https://github.com/ErfanNikouie/Lightflow",
+  "repository": "https://github.com/ErfanNikouie/Lightflow",
+  "license": "MIT",
+  "keywords": [
+    "development",
+    "orchestration",
+    "review",
+    "architecture"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/"
+}

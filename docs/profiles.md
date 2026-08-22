@@ -17,3 +17,5 @@ scripts\setup.bat C:\path\to\project refined-balanced --profile-only
 ```
 
 The main session receives the Orchestrator model, while each project agent receives its role-specific values. Model selection is deterministic setup behavior, not runtime plugin mutation.
+
+These JSON profiles apply only to the Codex scaffold. Claude Code uses Haiku low for Explorer and inherits the active session model for the opt-in Architect, Worker, and Reviewer agents.

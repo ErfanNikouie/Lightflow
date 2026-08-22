@@ -1,6 +1,6 @@
 # Installation and updates
 
-## Plugin
+## Codex plugin
 
 Add the Git repository as a Codex marketplace, then install the plugin by marketplace name:
 
@@ -18,7 +18,25 @@ codex plugin add lightflow@lightflow
 
 Restart the ChatGPT desktop app and use a new task after plugin updates so new skill content is loaded.
 
-## Project scaffold
+## Claude Code plugin
+
+Add the same repository as a Claude marketplace, then install the plugin:
+
+```powershell
+claude plugin marketplace add ErfanNikouie/Lightflow
+claude plugin install lightflow@lightflow
+```
+
+Refresh later with:
+
+```powershell
+claude plugin marketplace update lightflow
+claude plugin update lightflow@lightflow
+```
+
+Run `/reload-plugins` after local development changes. The Claude plugin already contains the shared skill and native agents; the project scaffold below is Codex-only.
+
+## Codex project scaffold
 
 Run from this repository:
 

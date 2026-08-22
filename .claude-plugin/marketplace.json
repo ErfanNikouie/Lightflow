@@ -1,0 +1,13 @@
+{
+  "name": "lightflow",
+  "owner": {
+    "name": "Lightflow contributors"
+  },
+  "plugins": [
+    {
+      "name": "lightflow",
+      "source": "./plugins/lightflow",
+      "description": "Cost-aware software-development orchestration with focused repository exploration"
+    }
+  ]
+}

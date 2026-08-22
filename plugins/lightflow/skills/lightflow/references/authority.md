@@ -20,4 +20,4 @@ Ponytail applies implicitly to unnecessary complexity: reuse existing code, stan
 
 ## Installed skills
 
-Use relevant platform, vendor, project, and review skills that are available in the current Codex installation. Skill descriptions determine when they apply; Lightflow does not hardcode a private skill inventory. Its custom agents omit `skills.config`, so they inherit the parent session's skill configuration. This lets Unity, Go, Ponytail, and other compatible skills participate without becoming plugin dependencies. If a skill is not installed or is disabled, do not claim to use it; fall back to repository guidance and native tooling.
+Use relevant platform, vendor, project, and review skills that are available in the current host. Skill descriptions determine when they apply; Lightflow does not hardcode a private inventory. Codex project agents inherit the parent session's skill configuration, while Claude plugin agents do not preload skills. If a skill is not installed or is disabled, do not claim to use it; fall back to repository guidance and native tooling.
